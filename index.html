@@ -3,17 +3,29 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Sightline AI - AI-Powered Vision Assistance for Independent Living">
-  <meta name="keywords" content="AI, vision assistance, visually impaired, accessibility, assistive technology">
-  <title>Sightline AI - See Beyond Sight</title>
+  <meta name="description" content="SightLineAI — $199 AI-powered smart goggles for the visually impaired. Real-time object detection, text reading, and navigation. Works offline in Bengali and English.">
+  <meta name="keywords" content="AI, vision assistance, visually impaired, accessibility, assistive technology, smart goggles, blind, Bangladesh, Bengali">
+  <meta name="theme-color" content="#1F4E78">
+  <meta name="author" content="Rudra Sarker">
+  <title>SightLineAI — See Beyond Sight</title>
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="SightLineAI — AI-Powered Smart Goggles for the Blind">
+  <meta property="og:description" content="$199 wearable vision assistance with real-time object detection, OCR, and navigation. Works offline. Supports Bengali.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://rudra496.github.io/sightlineai/">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <!-- Favicon (inline SVG) -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👁️</text></svg>">
 
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-  <!-- Lucide Icons (CDN) -->
-  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Lucide Icons (pinned version) -->
+  <script src="https://unpkg.com/lucide@0.344.0"></script>
 
   <style>
     /* CSS Variables */
@@ -51,6 +63,25 @@
       --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
       --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
       --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Utility */
+    .space-y-6 > * + * { margin-top: 1.5rem; }
+
+    /* Scroll reveal animation */
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .reveal { opacity: 1; transform: none; transition: none; }
+      html { scroll-behavior: auto; }
     }
 
     /* Reset & Base Styles */
@@ -306,7 +337,7 @@
     .hero-stats {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: var(--spacing-lg);
+      gap: var(--spacing-md);
       margin-top: var(--spacing-xl);
     }
 
@@ -803,7 +834,7 @@
     <div class="navbar-container">
       <a href="#" class="navbar-logo">
         <i data-lucide="eye"></i>
-        <span class="navbar-logo-text">Sightline AI</span>
+        <span class="navbar-logo-text">SightLineAI</span>
       </a>
       <ul class="nav-links">
         <li><a href="#about">About</a></li>
@@ -831,9 +862,9 @@
     <div class="hero-grid">
       <div class="hero-content">
         <h1>See Beyond Sight</h1>
-        <p class="tagline">AI-Powered Vision Assistance for Independent Living</p>
+        <p class="tagline">AI-Powered Smart Goggles for the Visually Impaired</p>
         <p class="description">
-          We empower 285 million+ visually impaired individuals in developing countries to navigate independently. Our affordable wearable device uses cutting-edge AI to convert visual information into real-time audio guidance.
+          Real-time object detection, text reading, and navigation assistance — at <strong>$199</strong> (94% cheaper than alternatives). Works offline. Speaks Bengali and English.
         </p>
         <div class="hero-badges">
           <div class="badge badge-primary">
@@ -841,26 +872,40 @@
             <span>85-90% Accuracy</span>
           </div>
           <div class="badge badge-secondary">
-            <i data-lucide="award" style="width: 1.25rem; height: 1.25rem;"></i>
-            <span>Low Latency</span>
+            <i data-lucide="wifi-off" style="width: 1.25rem; height: 1.25rem;"></i>
+            <span>100% Offline</span>
           </div>
         </div>
-        <a href="#contact" class="hero-cta">
-          Get in Touch
-          <i data-lucide="arrow-right" style="width: 1.25rem; height: 1.25rem;"></i>
-        </a>
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+          <a href="#contact" class="hero-cta">
+            Get in Touch
+            <i data-lucide="arrow-right" style="width: 1.25rem; height: 1.25rem;"></i>
+          </a>
+          <a href="https://youtu.be/JQ796Gq9xMc" target="_blank" rel="noopener" class="hero-cta" style="background-color: var(--color-accent);">
+            Watch Demo
+            <i data-lucide="play" style="width: 1.25rem; height: 1.25rem;"></i>
+          </a>
+        </div>
       </div>
       <div class="hero-card">
         <h2>Our Mission</h2>
-        <p class="mission-quote">"Independence is not a luxury—it is dignity."</p>
+        <p class="mission-quote">"Independence is not a luxury — it is dignity."</p>
         <div class="hero-stats">
           <div class="stat-card">
-            <div class="stat-value">285M+</div>
-            <div class="stat-label">Addressable Users</div>
+            <div class="stat-value">2.2B</div>
+            <div class="stat-label">Visually Impaired Worldwide</div>
           </div>
           <div class="stat-card">
             <div class="stat-value">94%</div>
-            <div class="stat-label">Cost Advantage</div>
+            <div class="stat-label">Cheaper Than Alternatives</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">$199</div>
+            <div class="stat-label">Device Price</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">65g</div>
+            <div class="stat-label">Goggle Weight</div>
           </div>
         </div>
       </div>
@@ -926,20 +971,20 @@
       <div class="space-y-6">
         <div class="performance-stats">
           <div class="perf-item">
-            <p class="perf-label">Accuracy</p>
+            <p class="perf-label">Object Detection</p>
             <p class="perf-value">85-90%</p>
           </div>
           <div class="perf-item">
-            <p class="perf-label">Latency</p>
-            <p class="perf-value perf-value-primary">Low latency</p>
+            <p class="perf-label">Response Time</p>
+            <p class="perf-value perf-value-primary">150-300ms</p>
           </div>
           <div class="perf-item">
             <p class="perf-label">Battery Life</p>
-            <p class="perf-value perf-value-primary">8+ Hours</p>
+            <p class="perf-value perf-value-primary">6-8 Hours</p>
           </div>
           <div class="perf-item">
-            <p class="perf-label">Offline Capability</p>
-            <p class="perf-value">70%</p>
+            <p class="perf-label">Obstacle Detection</p>
+            <p class="perf-value">95%</p>
           </div>
         </div>
         <div class="pricing-card">
@@ -955,33 +1000,33 @@
     </div>
 
     <div class="section-header" style="margin-top: 4rem;">
-      <h2>Planned Partnerships & Market Strategy</h2>
-      <p>We are actively planning strategic partnerships with leading institutions to validate and deploy our solution at scale.</p>
+      <h2>Strategic Partners</h2>
+      <p>Collaborating with leading institutions for validation and deployment</p>
     </div>
     <div class="partners-grid">
       <div class="partner-card">
         <div class="partner-type">
-          <i data-lucide="check-circle-2" style="width: 1.25rem; height: 1.25rem;"></i>
-          <span>Planned Partnership</span>
-        </div>
-        <h4>BRAC</h4>
-        <p>Bangladesh's largest NGO, serving millions in rural and urban communities</p>
-      </div>
-      <div class="partner-card">
-        <div class="partner-type">
-          <i data-lucide="check-circle-2" style="width: 1.25rem; height: 1.25rem;"></i>
-          <span>Planned Partnership</span>
+          <i data-lucide="building-2" style="width: 1.25rem; height: 1.25rem;"></i>
+          <span>Clinical Partner</span>
         </div>
         <h4>Bangladesh Eye Hospital</h4>
-        <p>Leading eye care institution with extensive patient network</p>
+        <p>Leading eye care institution providing clinical validation and user testing with visually impaired patients</p>
       </div>
       <div class="partner-card">
         <div class="partner-type">
-          <i data-lucide="check-circle-2" style="width: 1.25rem; height: 1.25rem;"></i>
-          <span>Planned Partnership</span>
+          <i data-lucide="globe" style="width: 1.25rem; height: 1.25rem;"></i>
+          <span>Distribution Partner</span>
+        </div>
+        <h4>BRAC</h4>
+        <p>World's largest NGO with established disability programs across Bangladesh for mass distribution reach</p>
+      </div>
+      <div class="partner-card">
+        <div class="partner-type">
+          <i data-lucide="microscope" style="width: 1.25rem; height: 1.25rem;"></i>
+          <span>Research Partner</span>
         </div>
         <h4>icddr,b</h4>
-        <p>International Centre for Diarrhoeal Disease Research, Bangladesh</p>
+        <p>International research centre for impact measurement and peer-reviewed health outcomes publication</p>
       </div>
     </div>
   </section>
@@ -1070,14 +1115,14 @@
           <i data-lucide="mail"></i>
           <div>
             <p class="contact-item-label">Email</p>
-            <p class="contact-item-value"><a href="mailto:rudrasarker130@gmail.com">rudrasarker130@gmail.com</a></p>
+            <p class="contact-item-value"><a href="mailto:rudrasarker125@gmail.com">rudrasarker125@gmail.com</a></p>
           </div>
         </div>
         <div class="contact-item">
           <i data-lucide="phone"></i>
           <div>
             <p class="contact-item-label">Phone</p>
-            <p class="contact-item-value"><a href="tel:+8801988223165">+880 1988-223165</a></p>
+            <p class="contact-item-value"><a href="tel:+8801636144391">+880 1636-144391</a></p>
           </div>
         </div>
         <div class="contact-item">
@@ -1089,10 +1134,10 @@
         </div>
       </div>
       <div class="contact-info-card">
-        <h3>For RBPC & Investors</h3>
-        <p style="margin-bottom: 1rem;">We are actively seeking partners, advisors, and investment to scale our solution.</p>
-        <p style="font-size: 0.9rem; opacity: 0.8;">Rice Business Plan Competition 2026 Application</p>
-        <p style="font-size: 0.9rem; opacity: 0.8;">Shahjalal University of Science and Technology (SUST)</p>
+        <h3>For Investors & Partners</h3>
+        <p style="margin-bottom: 1rem;">Seeking seed investment ($100K-500K) and strategic partnerships to scale from prototype to 5,000 users across South Asia.</p>
+        <p style="font-size: 0.9rem; opacity: 0.8;">Registered business entity with Trade License in Bangladesh</p>
+        <p style="font-size: 0.9rem; opacity: 0.8;">MIT Solve 2026 Applicant | Shahjalal University of Science and Technology</p>
       </div>
     </div>
   </section>
@@ -1102,13 +1147,15 @@
     <div class="footer-container">
       <div class="footer-brand">
         <i data-lucide="eye" style="width: 1.5rem; height: 1.5rem;"></i>
-        <span>Sightline AI</span>
+        <span>SightLineAI</span>
       </div>
       <div class="footer-copyright">
-        © 2026 Sightline AI. All rights reserved.
+        &copy; 2026 SightLineAI. Built in Bangladesh for the world.
       </div>
       <div class="footer-links">
+        <a href="https://github.com/rudra496/sightlineai" target="_blank" rel="noopener noreferrer">GitHub</a>
         <a href="https://linkedin.com/in/rudrasarker" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+        <a href="https://youtu.be/JQ796Gq9xMc" target="_blank" rel="noopener noreferrer">Demo Video</a>
       </div>
     </div>
   </footer>
@@ -1120,39 +1167,43 @@
     // Navbar scroll effect
     const navbar = document.querySelector('.navbar');
     window.addEventListener('scroll', () => {
-      if (window.scrollY > 50) {
-        navbar.classList.add('scrolled');
-      } else {
-        navbar.classList.remove('scrolled');
-      }
+      navbar.classList.toggle('scrolled', window.scrollY > 50);
     });
 
     // Mobile menu toggle
     const mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
     const mobileMenu = document.getElementById('mobile-menu');
-
-    mobileMenuToggle.addEventListener('click', () => {
-      mobileMenu.classList.toggle('active');
-    });
-
-    // Close mobile menu when clicking a link
+    mobileMenuToggle.addEventListener('click', () => mobileMenu.classList.toggle('active'));
     mobileMenu.querySelectorAll('a').forEach(link => {
-      link.addEventListener('click', () => {
-        mobileMenu.classList.remove('active');
-      });
+      link.addEventListener('click', () => mobileMenu.classList.remove('active'));
     });
+
+    // Close mobile menu on outside click
+    document.addEventListener('click', (e) => {
+      if (!mobileMenu.contains(e.target) && !mobileMenuToggle.contains(e.target)) {
+        mobileMenu.classList.remove('active');
+      }
+    });
+
+    // Scroll reveal
+    const revealEls = document.querySelectorAll('.problem-card, .team-card, .impact-card, .partner-card, .section-header');
+    revealEls.forEach(el => el.classList.add('reveal'));
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1 });
+    revealEls.forEach(el => observer.observe(el));
 
     // Smooth scroll for anchor links
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
       anchor.addEventListener('click', function (e) {
         e.preventDefault();
         const target = document.querySelector(this.getAttribute('href'));
-        if (target) {
-          target.scrollIntoView({
-            behavior: 'smooth',
-            block: 'start'
-          });
-        }
+        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
       });
     });
   </script>
