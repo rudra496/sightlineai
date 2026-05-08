@@ -315,7 +315,7 @@
 
     /* Hero Card */
     .hero-card {
-      background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
+      background: linear-gradient(135deg, #1F4E78 0%, #2E5090 50%, #10B981 100%);
       border-radius: var(--radius-2xl);
       padding: var(--spacing-2xl);
       color: var(--color-white);
@@ -365,7 +365,7 @@
     }
 
     .section-gray {
-      background-color: var(--color-gray-50);
+      background: linear-gradient(180deg, #F9FAFB 0%, #EFF6FF 50%, #F9FAFB 100%);
     }
 
     .section-header {
@@ -412,11 +412,18 @@
       border-radius: var(--radius-xl);
       padding: var(--spacing-lg);
       box-shadow: var(--shadow-md);
-      transition: box-shadow 0.3s ease;
+      transition: box-shadow 0.3s ease, transform 0.3s ease;
+      border-top: 3px solid transparent;
     }
+
+    .problem-card:nth-child(1) { border-top-color: #EF4444; }
+    .problem-card:nth-child(2) { border-top-color: #F59E0B; }
+    .problem-card:nth-child(3) { border-top-color: #3B82F6; }
+    .problem-card:nth-child(4) { border-top-color: #8B5CF6; }
 
     .problem-card:hover {
       box-shadow: var(--shadow-lg);
+      transform: translateY(-4px);
     }
 
     .problem-icon {
@@ -455,7 +462,7 @@
     }
 
     .solution-card {
-      background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
+      background: linear-gradient(135deg, #1F4E78 0%, #2E5090 40%, #10B981 100%);
       border-radius: var(--radius-2xl);
       padding: var(--spacing-2xl);
       color: var(--color-white);
@@ -508,9 +515,10 @@
 
     /* Pricing Card */
     .pricing-card {
-      background-color: rgba(16, 185, 129, 0.1);
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%);
       border-radius: var(--radius-xl);
       padding: var(--spacing-xl);
+      border: 1px solid rgba(16, 185, 129, 0.2);
     }
 
     .pricing-card h4 {
@@ -564,6 +572,17 @@
       border-radius: var(--radius-xl);
       padding: var(--spacing-lg);
       box-shadow: var(--shadow-md);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      border-left: 4px solid var(--color-accent);
+    }
+
+    .partner-card:nth-child(1) { border-left-color: #3B82F6; }
+    .partner-card:nth-child(2) { border-left-color: #10B981; }
+    .partner-card:nth-child(3) { border-left-color: #F59E0B; }
+
+    .partner-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
     }
 
     .partner-type {
@@ -628,11 +647,15 @@
     }
 
     .team-header.primary {
-      background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
+      background: linear-gradient(135deg, #1F4E78 0%, #3B82F6 100%);
     }
 
     .team-header.accent {
-      background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-dark) 100%);
+      background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+    }
+
+    .team-header.warm {
+      background: linear-gradient(135deg, #F59E0B 0%, #EF4444 100%);
     }
 
     .team-header svg {
@@ -691,6 +714,18 @@
       border-radius: var(--radius-xl);
       padding: var(--spacing-xl);
       text-align: center;
+      border-bottom: 3px solid transparent;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .impact-card:nth-child(1) { border-bottom-color: #1F4E78; }
+    .impact-card:nth-child(2) { border-bottom-color: #10B981; }
+    .impact-card:nth-child(3) { border-bottom-color: #8B5CF6; }
+    .impact-card:nth-child(4) { border-bottom-color: #F59E0B; }
+
+    .impact-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
     }
 
     .impact-value {
@@ -714,7 +749,7 @@
 
     /* Contact Section */
     .contact-section {
-      background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
+      background: linear-gradient(135deg, #1F4E78 0%, #2E5090 40%, #059669 100%);
       color: var(--color-white);
     }
 
@@ -864,7 +899,7 @@
         <h1>See Beyond Sight</h1>
         <p class="tagline">AI-Powered Smart Goggles for the Visually Impaired</p>
         <p class="description">
-          Real-time object detection, text reading, and navigation assistance — at <strong>$199</strong> (94% cheaper than alternatives). Works offline. Speaks Bengali and English.
+          Real-time object detection, text reading, and navigation assistance — at <strong>$199</strong> (94% cheaper than alternatives). Designed to work in low-connectivity areas. Speaks Bengali and English.
         </p>
         <div class="hero-badges">
           <div class="badge badge-primary">
@@ -873,7 +908,7 @@
           </div>
           <div class="badge badge-secondary">
             <i data-lucide="wifi-off" style="width: 1.25rem; height: 1.25rem;"></i>
-            <span>100% Offline</span>
+            <span>Edge AI Processing</span>
           </div>
         </div>
         <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
@@ -963,7 +998,7 @@
           <li><i data-lucide="check-circle-2" style="width: 1.25rem; height: 1.25rem; flex-shrink: 0;"></i> Real-time object detection and obstacle avoidance</li>
           <li><i data-lucide="check-circle-2" style="width: 1.25rem; height: 1.25rem; flex-shrink: 0;"></i> Text and currency recognition for reading signs and banknotes</li>
           <li><i data-lucide="check-circle-2" style="width: 1.25rem; height: 1.25rem; flex-shrink: 0;"></i> Local language voice commands (Bengali and English)</li>
-          <li><i data-lucide="check-circle-2" style="width: 1.25rem; height: 1.25rem; flex-shrink: 0;"></i> Offline capability works without internet connection</li>
+          <li><i data-lucide="check-circle-2" style="width: 1.25rem; height: 1.25rem; flex-shrink: 0;"></i> On-device AI designed for low-connectivity environments</li>
           <li><i data-lucide="check-circle-2" style="width: 1.25rem; height: 1.25rem; flex-shrink: 0;"></i> Emergency SOS alert to preset contacts</li>
           <li><i data-lucide="check-circle-2" style="width: 1.25rem; height: 1.25rem; flex-shrink: 0;"></i> Lightweight, comfortable wearable design</li>
         </ul>
@@ -1000,33 +1035,33 @@
     </div>
 
     <div class="section-header" style="margin-top: 4rem;">
-      <h2>Strategic Partners</h2>
-      <p>Collaborating with leading institutions for validation and deployment</p>
+      <h2>Target Partnerships</h2>
+      <p>We are building strategic partnerships with leading institutions for validation and deployment</p>
     </div>
     <div class="partners-grid">
       <div class="partner-card">
         <div class="partner-type">
           <i data-lucide="building-2" style="width: 1.25rem; height: 1.25rem;"></i>
-          <span>Clinical Partner</span>
+          <span>Planned Clinical Partner</span>
         </div>
         <h4>Bangladesh Eye Hospital</h4>
-        <p>Leading eye care institution providing clinical validation and user testing with visually impaired patients</p>
+        <p>Leading eye care institution for clinical validation and user testing with visually impaired patients</p>
       </div>
       <div class="partner-card">
         <div class="partner-type">
           <i data-lucide="globe" style="width: 1.25rem; height: 1.25rem;"></i>
-          <span>Distribution Partner</span>
+          <span>Planned Distribution Partner</span>
         </div>
         <h4>BRAC</h4>
-        <p>World's largest NGO with established disability programs across Bangladesh for mass distribution reach</p>
+        <p>World's largest NGO with established disability programs across Bangladesh for potential distribution</p>
       </div>
       <div class="partner-card">
         <div class="partner-type">
           <i data-lucide="microscope" style="width: 1.25rem; height: 1.25rem;"></i>
-          <span>Research Partner</span>
+          <span>Planned Research Partner</span>
         </div>
         <h4>icddr,b</h4>
-        <p>International research centre for impact measurement and peer-reviewed health outcomes publication</p>
+        <p>International research centre for potential impact measurement and health outcomes tracking</p>
       </div>
     </div>
   </section>
@@ -1040,7 +1075,7 @@
     <div class="team-grid">
       <div class="team-card">
         <div class="team-header primary">
-          <i data-lucide="users" style="width: 4rem; height: 4rem;"></i>
+          <i data-lucide="rocket" style="width: 4rem; height: 4rem;"></i>
         </div>
         <div class="team-body">
           <h3>Rudra Sarker</h3>
@@ -1051,8 +1086,8 @@
         </div>
       </div>
       <div class="team-card">
-        <div class="team-header primary">
-          <i data-lucide="users" style="width: 4rem; height: 4rem;"></i>
+        <div class="team-header warm">
+          <i data-lucide="trending-up" style="width: 4rem; height: 4rem;"></i>
         </div>
         <div class="team-body">
           <h3>Lutfay Homaira Islam</h3>
@@ -1064,7 +1099,7 @@
       </div>
       <div class="team-card">
         <div class="team-header accent">
-          <i data-lucide="award" style="width: 4rem; height: 4rem;"></i>
+          <i data-lucide="brain" style="width: 4rem; height: 4rem;"></i>
         </div>
         <div class="team-body">
           <h3>Arpita Chakraborty Tropa</h3>
