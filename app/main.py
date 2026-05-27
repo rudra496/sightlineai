@@ -43,6 +43,16 @@ def validation_exception_handler(_: Request, exc: RequestValidationError) -> JSO
     )
 
 
+@app.exception_handler(HTTPException)
+def http_exception_handler(_: Request, exc: HTTPException) -> JSONResponse:
+    if isinstance(exc.detail, dict) and "error" in exc.detail and "detail" in exc.detail:
+        return JSONResponse(status_code=exc.status_code, content=exc.detail)
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"error": "http_error", "detail": str(exc.detail)},
+    )
+
+
 @app.get("/api/health")
 def health() -> dict[str, str]:
     return {"status": "ok", "service": settings.app_name, "model": settings.qwen_model}

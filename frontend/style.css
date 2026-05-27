@@ -114,7 +114,7 @@ button:disabled {
 
 @media (max-width: 600px) {
   .container {
-    width: min(96vw, 96vw);
+    width: 96vw;
   }
 
   .card {

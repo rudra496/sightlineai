@@ -53,7 +53,7 @@ async function analyzeScene() {
 
     const body = await response.json();
     if (!response.ok) {
-      const detail = body?.detail?.detail || body?.detail || "Request failed";
+      const detail = body?.detail || "Request failed";
       throw new Error(detail);
     }
 
