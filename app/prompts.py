@@ -33,6 +33,5 @@ def build_user_prompt(scene_description: str) -> str:
                 "Recommend physical verification with cane or other aids if relevant."
             ),
         },
-        "style": "Plain sentences. No markdown. No lists. No formatting. JSON only.",
     }
     return json.dumps(payload, ensure_ascii=False)

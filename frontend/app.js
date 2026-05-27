@@ -40,6 +40,13 @@ function updateCharCount() {
   charCountEl.textContent = `${len} / ${MAX_CHARS}`;
   charCountEl.className = "char-count" +
     (len >= MAX_CHARS ? " at-limit" : len >= MAX_CHARS * 0.85 ? " near-limit" : "");
+
+  // Announce limit milestones accessibly via the status bar
+  if (len === MAX_CHARS) {
+    setStatus("Character limit reached (2000).", "error");
+  } else if (len === Math.floor(MAX_CHARS * 0.9)) {
+    setStatus("Approaching character limit.", "");
+  }
 }
 
 // ── Output rendering ─────────────────────────────────────────────────────────
@@ -192,7 +199,6 @@ async function copyGuidance() {
 
   try {
     await navigator.clipboard.writeText(text);
-    const prev = copyBtn.textContent;
     copyBtn.innerHTML = '<span class="btn-icon" aria-hidden="true">✅</span> Copied!';
     setTimeout(() => {
       copyBtn.innerHTML = '<span class="btn-icon" aria-hidden="true">📋</span> Copy';

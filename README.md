@@ -58,7 +58,7 @@ For the full Mermaid diagram and workflow walkthrough see [docs/architecture.md]
 ### 1 — Clone & install
 
 ```bash
-git clone https://github.com/rudra496/sightlineai.git
+git clone https://github.com/YOUR_USERNAME/sightlineai.git
 cd sightlineai
 python3 -m venv .venv
 source .venv/bin/activate      # Windows: .venv\Scripts\activate

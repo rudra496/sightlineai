@@ -92,10 +92,16 @@ h1 {
   font-size: clamp(1.75rem, 4vw, 2.4rem);
   font-weight: 800;
   letter-spacing: -0.02em;
-  background: linear-gradient(135deg, #e9eefb 0%, var(--accent) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--text);
+}
+
+@supports (-webkit-background-clip: text) or (background-clip: text) {
+  h1 {
+    background: linear-gradient(135deg, #e9eefb 0%, var(--accent) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
 }
 
 h2 {
@@ -488,11 +494,19 @@ button:disabled {
 
 /* ── Reduced motion ────────────────────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
-  .spinner,
-  .skeleton-line,
-  button,
-  textarea {
+  .spinner {
     animation: none;
-    transition: none;
+    border: 2px solid var(--accent);
+  }
+
+  .skeleton-line {
+    animation: none;
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  button,
+  textarea,
+  .example-chip {
+    transition-duration: 0s;
   }
 }
