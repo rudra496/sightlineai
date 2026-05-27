@@ -26,3 +26,13 @@ node_modules/
 .DS_Store
 .vscode/
 .idea/
+thumbs.db
+*.swp
+
+# Archives
+*.tar.gz
+*.zip
+
+# Tooling caches
+coverage/
+.mypy_cache/

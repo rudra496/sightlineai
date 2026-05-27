@@ -1,119 +1,254 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>SightlineAI | Accessibility-First AI Guidance</title>
-  <meta name="description" content="SightlineAI is an accessibility-first AI assistant with Qwen guidance, image and voice input, memory, offline fallback, edge-ready architecture, and geospatial context." />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SightlineAI — Accessibility-First AI Guidance for Blind & Visually Impaired Users</title>
+  <meta name="description" content="SightlineAI is an open-source AI-powered accessibility guidance platform for blind and visually impaired users. Features Qwen AI, offline fallback, voice input/output, image analysis, multi-language support, and WebSocket streaming.">
+  <meta name="keywords" content="accessibility, AI, blind, visually impaired, navigation, Qwen, assistive technology, sightlineai, open source, offline guidance, voice assistant">
+  <meta name="author" content="Rudra Sarker">
+  <meta name="robots" content="index, follow">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="SightlineAI — Accessibility-First AI Guidance">
+  <meta property="og:description" content="AI-powered environmental guidance for blind and visually impaired users. Works online with Qwen AI and offline with deterministic fallback.">
+  <meta property="og:url" content="https://rudra496.github.io/sightlineai">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://raw.githubusercontent.com/rudra496/sightlineai/main/frontend/favicon.svg">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="SightlineAI — Accessibility-First AI Guidance">
+  <meta name="twitter:description" content="AI-powered environmental guidance for blind and visually impaired users with offline fallback.">
+  <meta name="twitter:creator" content="@Rudra496">
+  <meta name="twitter:image" content="https://raw.githubusercontent.com/rudra496/sightlineai/main/frontend/favicon.svg">
+
+  <!-- Canonical -->
+  <link rel="canonical" href="https://rudra496.github.io/sightlineai">
+
+  <link rel="icon" type="image/svg+xml" href="frontend/favicon.svg">
+  <link rel="stylesheet" href="frontend/style.css">
+
+  <!-- Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "SightlineAI",
+    "description": "Accessibility-first AI guidance platform for blind and visually impaired users",
+    "url": "https://rudra496.github.io/sightlineai",
+    "applicationCategory": "AccessibilityApplication",
+    "operatingSystem": "Web",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "author": { "@type": "Person", "name": "Rudra Sarker", "url": "https://rudra496.github.io/site" },
+    "programmingLanguage": "Python",
+    "license": "https://opensource.org/licenses/MIT"
+  }
+  </script>
+
   <style>
-    :root { --bg:#070b16; --panel:#101a33; --text:#e8efff; --muted:#aeb9d8; --accent:#72abff; --ok:#77dfb4; --radius:14px; }
-    *{box-sizing:border-box} body{margin:0;font-family:Inter,system-ui,sans-serif;background:radial-gradient(circle at top right,#213b74 0%,var(--bg) 50%);color:var(--text)}
-    a{color:var(--accent)} .wrap{width:min(1100px,94vw);margin:0 auto} .section{padding:1.2rem;border:1px solid #2d3e69;background:rgba(16,26,51,.94);border-radius:var(--radius);margin:1rem 0}
-    .hero{padding:2.2rem 0 1rem} h1{font-size:clamp(2rem,6vw,3.3rem);margin:.2rem 0}.muted{color:var(--muted)}
-    .cta{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1rem}.btn{padding:.6rem 1rem;border-radius:999px;text-decoration:none;font-weight:600;border:1px solid #2d3e69}
-    .btn.primary{background:var(--accent);color:#061022;border-color:transparent}.grid{display:grid;gap:.8rem}.grid.cols-2{grid-template-columns:repeat(2,1fr)}.grid.cols-3{grid-template-columns:repeat(3,1fr)}
-    ul{margin:.4rem 0 .2rem;padding-left:1.1rem} code{background:#0a1328;padding:.05rem .35rem;border-radius:5px}
-    footer{padding:1.4rem 0 2rem;color:var(--muted);text-align:center}
-    @media(max-width:860px){.grid.cols-2,.grid.cols-3{grid-template-columns:1fr}}
+    :root {
+      --bg: #070b16; --panel: #10162a; --border: #2d3a60; --text: #ecf2ff;
+      --muted: #b2bdd6; --accent: #6da8ff; --accent-2: #73e2ab; --danger: #ff8c8c;
+      --radius: 14px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Inter, system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+    .wrap { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .hero { text-align: center; padding: 4rem 0 3rem; background: linear-gradient(135deg, #0f1a3a 0%, #0a1628 50%, #0d2240 100%); border-radius: 0 0 var(--radius) var(--radius); margin-bottom: 2rem; }
+    .hero h1 { font-size: clamp(2rem, 5vw, 3rem); margin: 0.5rem 0; background: linear-gradient(135deg, #6da8ff, #73e2ab); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .hero .tagline { color: var(--muted); font-size: 1.1rem; max-width: 600px; margin: 0 auto 1.5rem; line-height: 1.6; }
+    .hero .eyebrow { color: var(--accent-2); font-size: 0.85rem; letter-spacing: 0.1em; text-transform: uppercase; }
+    .badges { display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap; margin: 1rem 0; }
+    .badges img { height: 22px; }
+    .cta-row { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-top: 1.5rem; }
+    .cta { display: inline-flex; align-items: center; padding: 0.7rem 1.5rem; border-radius: 999px; font-weight: 600; font-size: 0.95rem; transition: transform 0.2s, box-shadow 0.2s; }
+    .cta-primary { background: linear-gradient(135deg, #6da8ff, #73e2ab); color: #081021; }
+    .cta-ghost { background: rgba(109,168,255,0.12); color: var(--text); border: 1px solid var(--border); }
+    .cta:hover { transform: translateY(-2px); box-shadow: 0 4px 20px rgba(109,168,255,0.3); text-decoration: none; }
+    h2 { font-size: 1.5rem; margin: 2.5rem 0 1rem; }
+    .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem; margin: 1.5rem 0; }
+    .feature { background: rgba(16,22,42,0.75); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; transition: transform 0.2s, box-shadow 0.2s; }
+    .feature:hover { transform: translateY(-3px); box-shadow: 0 8px 30px rgba(0,0,0,0.4); }
+    .feature h3 { font-size: 1.1rem; margin-bottom: 0.5rem; }
+    .feature p { color: var(--muted); font-size: 0.9rem; line-height: 1.5; }
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; margin: 2rem 0; }
+    .stat { text-align: center; background: rgba(16,22,42,0.75); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem 1rem; }
+    .stat .number { font-size: 2rem; font-weight: 700; background: linear-gradient(135deg, #6da8ff, #73e2ab); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .stat .label { color: var(--muted); font-size: 0.8rem; margin-top: 0.25rem; }
+    .tech { display: flex; gap: 0.75rem; flex-wrap: wrap; margin: 1rem 0; }
+    .tech span { background: rgba(109,168,255,0.12); border: 1px solid var(--border); border-radius: 999px; padding: 0.35rem 0.85rem; font-size: 0.8rem; color: var(--muted); }
+    .code-block { background: rgba(10,17,34,0.9); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; font-family: 'SF Mono', Menlo, monospace; font-size: 0.85rem; overflow-x: auto; margin: 1rem 0; line-height: 1.6; }
+    .code-block .comment { color: #5a6a8a; }
+    .footer { text-align: center; padding: 2rem 0; color: var(--muted); font-size: 0.85rem; border-top: 1px solid var(--border); margin-top: 3rem; }
+    .awards { display: flex; gap: 0.75rem; flex-wrap: wrap; margin: 1rem 0; }
+    .award { background: rgba(115,226,171,0.1); border: 1px solid rgba(115,226,171,0.3); border-radius: 999px; padding: 0.3rem 0.75rem; font-size: 0.8rem; }
+    .section { margin: 2.5rem 0; }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <header class="hero">
-      <p class="muted">Hackathon-ready accessibility AI platform</p>
-      <h1>SightlineAI</h1>
-      <p class="muted">Qwen-powered environmental guidance for blind and visually impaired users with multimodal input, resilient fallback, geospatial risk support, and edge-ready architecture.</p>
-      <div class="cta">
-        <a class="btn primary" href="/frontend/">Try live app</a>
-        <a class="btn" href="https://github.com/rudra496/sightlineai">View GitHub</a>
-      </div>
-    </header>
+  <nav class="wrap" style="padding-top:1rem; display:flex; justify-content:space-between; align-items:center;">
+    <strong style="font-size:1.1rem;">SightlineAI</strong>
+    <div style="display:flex; gap:1.25rem; font-size:0.9rem;">
+      <a href="https://github.com/rudra496/sightlineai">GitHub</a>
+      <a href="https://github.com/rudra496/sightlineai#readme">Docs</a>
+      <a href="https://youtu.be/JQ796Gq9xMc">Demo</a>
+      <a href="https://www.linkedin.com/in/rudrasarker">LinkedIn</a>
+    </div>
+  </nav>
 
-    <section class="section" id="mission">
-      <h2>Problem & mission</h2>
-      <p class="muted">Many accessibility tools fail in low-connectivity or high-uncertainty environments. SightlineAI exists to deliver practical, safety-first guidance that still works when cloud AI is unavailable.</p>
+  <header class="hero">
+    <div class="wrap">
+      <p class="eyebrow">Open-Source Accessibility AI</p>
+      <h1>SightlineAI</h1>
+      <p class="tagline">AI-powered environmental guidance for blind and visually impaired users. Works with Qwen AI online and deterministic fallback offline — so guidance <strong>never</strong> disappears.</p>
+
+      <div class="awards" style="justify-content:center;">
+        <span class="award">🥇 Rice360 DEI Champion</span>
+        <span class="award">🏆 ICT Division Champion</span>
+        <span class="award">🏆 UIHP Champion</span>
+        <span class="award">🥉 VisionX Finalist</span>
+      </div>
+
+      <div class="cta-row">
+        <a class="cta cta-primary" href="https://github.com/rudra496/sightlineai">⭐ Star on GitHub</a>
+        <a class="cta cta-ghost" href="https://youtu.be/JQ796Gq9xMc">▶ Watch Demo</a>
+        <a class="cta cta-ghost" href="https://github.com/rudra496/sightlineai#quick-start">🚀 Quick Start</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="section" id="problem">
+      <h2>💔 The Problem</h2>
+      <p style="color:var(--muted); line-height:1.7; max-width:700px;">
+        Over <strong>2.2 billion people</strong> live with vision impairment. Most navigation tools need stable internet — when connectivity drops in rural areas, transit, or emergencies, they silently fail. <strong>No one should lose access to safety guidance because a cloud endpoint timed out.</strong>
+      </p>
     </section>
 
     <section class="section" id="features">
-      <h2>Core features</h2>
-      <div class="grid cols-3 muted">
-        <div><strong>Qwen guidance</strong><br/>Structured responses with action, safety, and confidence notes.</div>
-        <div><strong>Image input</strong><br/>Safe upload pipeline with validated types and fallback analysis.</div>
-        <div><strong>Voice input/output</strong><br/>Speech recognition (when supported) and speech synthesis.</div>
-        <div><strong>Memory/history</strong><br/>Session memory panel with restore, pin, and clear flows.</div>
-        <div><strong>Offline fallback</strong><br/>Deterministic fallback guidance when network/model fails.</div>
-        <div><strong>Edge-ready + geospatial</strong><br/>Risk scoring endpoint and future sensor-fusion hooks.</div>
+      <h2>✨ Features</h2>
+      <div class="features">
+        <article class="feature">
+          <h3>🧠 Qwen AI Engine</h3>
+          <p>Structured guidance with action steps, safety notes, and confidence ratings. Circuit breaker with exponential backoff for reliability.</p>
+        </article>
+        <article class="feature">
+          <h3>🔍 Vision Analysis</h3>
+          <p>Real image understanding via Qwen multimodal vision API. Upload photos for instant accessibility guidance.</p>
+        </article>
+        <article class="feature">
+          <h3>💬 Conversation Mode</h3>
+          <p>Multi-turn dialogue with context memory. Ask follow-up questions and get contextual guidance across messages.</p>
+        </article>
+        <article class="feature">
+          <h3>🔌 Offline Fallback</h3>
+          <p>Deterministic guidance engine that works without any network or API key. 20+ hazard keyword categories with Bangla templates.</p>
+        </article>
+        <article class="feature">
+          <h3>🌍 Multi-Language</h3>
+          <p>Guidance in English, Bangla (বাংলা), Arabic (العربية), and Spanish (Español). Voice input adapts to selected language.</p>
+        </article>
+        <article class="feature">
+          <h3>🎙️ Voice I/O</h3>
+          <p>Speech recognition for hands-free input. Text-to-speech for eyes-free guidance output. Works with screen readers.</p>
+        </article>
+        <article class="feature">
+          <h3>📊 Risk Scoring</h3>
+          <p>Geospatial risk assessment (0-100) from location, route, hazards, time of day, weather, and mobility aid context.</p>
+        </article>
+        <article class="feature">
+          <h3>♿ Accessibility Score</h3>
+          <p>Scene analysis with obstacle density, path clarity, sensory cue detection, and actionable recommendations.</p>
+        </article>
+        <article class="feature">
+          <h3>💾 Smart Memory</h3>
+          <p>Session history with pin, favorite, search, and export (JSON, CSV, Markdown). SQLite persistence for production.</p>
+        </article>
+        <article class="feature">
+          <h3>⚡ WebSocket Streaming</h3>
+          <p>Real-time token-by-token response streaming for instant feedback. Automatic fallback on connection issues.</p>
+        </article>
+        <article class="feature">
+          <h3>🐳 Docker Ready</h3>
+          <p>One-command deployment with Docker Compose. Health checks, environment configuration, and volume mounting.</p>
+        </article>
+        <article class="feature">
+          <h3>🔒 Secure by Default</h3>
+          <p>Rate limiting, CSP headers, input validation, bounded uploads, request tracing, and circuit breaker pattern.</p>
+        </article>
       </div>
     </section>
 
-    <section class="section" id="how-it-works">
-      <h2>How it works</h2>
-      <ol class="muted">
-        <li>User submits text, voice transcript, or image plus route context.</li>
-        <li>Backend validates payloads and attempts Qwen guidance.</li>
-        <li>If unavailable, deterministic fallback returns labeled offline guidance.</li>
-        <li>Guidance is returned as structured JSON and saved to session history.</li>
-      </ol>
+    <section class="section" id="stats">
+      <h2>📊 By the Numbers</h2>
+      <div class="stats">
+        <div class="stat"><div class="number">21+</div><div class="label">API Endpoints</div></div>
+        <div class="stat"><div class="number">4</div><div class="label">Languages</div></div>
+        <div class="stat"><div class="number">20+</div><div class="label">Hazard Categories</div></div>
+        <div class="stat"><div class="number">100%</div><div class="label">Offline Capable</div></div>
+        <div class="stat"><div class="number">0</div><div class="label">Frontend Dependencies</div></div>
+        <div class="stat"><div class="number">$199</div><div class="label">vs $3,500 Competitors</div></div>
+      </div>
+    </section>
+
+    <section class="section" id="quickstart">
+      <h2>🚀 Quick Start</h2>
+      <div class="code-block">
+        <span class="comment"># Clone & run in 60 seconds</span><br>
+        git clone https://github.com/rudra496/sightlineai.git<br>
+        cd sightlineai<br>
+        pip install -r requirements.txt<br>
+        uvicorn app.main:app --reload<br>
+        <br>
+        <span class="comment"># Or with Docker:</span><br>
+        docker-compose up -d
+      </div>
+      <p style="color:var(--muted); font-size:0.9rem; margin-top:0.5rem;">
+        Open <strong>http://localhost:8000</strong> — works immediately with offline fallback. Add a DashScope API key for live AI responses.
+      </p>
+    </section>
+
+    <section class="section" id="tech">
+      <h2>🛠️ Tech Stack</h2>
+      <div class="tech">
+        <span>Python 3.11+</span>
+        <span>FastAPI</span>
+        <span>Pydantic v2</span>
+        <span>Qwen 3.7 AI</span>
+        <span>WebSocket</span>
+        <span>SQLite</span>
+        <span>Docker</span>
+        <span>Web Speech API</span>
+        <span>Vanilla JS</span>
+      </div>
     </section>
 
     <section class="section" id="architecture">
-      <h2>Architecture</h2>
-      <p class="muted">Frontend → FastAPI → Qwen / fallback → memory store → accessible output. Includes image route, edge context scoring, and geospatial hooks.</p>
-      <p><a href="docs/architecture.md">Open detailed architecture docs</a></p>
-    </section>
-
-    <section class="section" id="demo">
-      <h2>Demo</h2>
-      <div class="grid cols-2 muted">
-        <div>
-          <p>Live app: <a href="/frontend/">/frontend/</a></p>
-          <p>Video: <a href="https://youtu.be/JQ796Gq9xMc" target="_blank" rel="noopener noreferrer">Watch demo</a></p>
-          <p>Safe demo tip: use the fallback button for deterministic behavior during judging.</p>
-        </div>
-        <div>
-          <p>Suggested judge flow:</p>
-          <ul>
-            <li>Run text guidance with route context</li>
-            <li>Upload an image with hint</li>
-            <li>Toggle voice input/output</li>
-            <li>Show memory restore and pin</li>
-          </ul>
-        </div>
+      <h2>🏗️ Architecture</h2>
+      <div class="code-block" style="font-size:0.8rem; line-height:1.8;">
+        User → Frontend (Text/Voice/Image) → FastAPI API<br>
+        &nbsp;&nbsp;→ Pydantic Validation<br>
+        &nbsp;&nbsp;→ Qwen Client (AI + Vision + Streaming) ──or── Fallback (Deterministic)<br>
+        &nbsp;&nbsp;→ Geospatial Risk → Accessibility Score → Session History → JSON Response
       </div>
     </section>
+  </main>
 
-    <section class="section" id="roadmap">
-      <h2>Roadmap status</h2>
-      <ul class="muted">
-        <li>✅ Image input MVP</li>
-        <li>✅ Offline fallback mode</li>
-        <li>✅ Geospatial risk heuristics</li>
-        <li>✅ Session history panel</li>
-        <li>✅ Voice input/output UX</li>
-        <li>✅ Edge-context abstraction endpoint</li>
-      </ul>
-    </section>
-
-    <section class="section" id="security">
-      <h2>Security & privacy</h2>
-      <ul class="muted">
-        <li>Secrets only via environment variables.</li>
-        <li>Image upload size/type validation and bounded reads.</li>
-        <li>Structured error schema with request IDs.</li>
-        <li>No committed <code>.env</code> files.</li>
-      </ul>
-    </section>
-
-    <section class="section" id="faq">
-      <h2>FAQ</h2>
-      <p><strong>Does it work offline?</strong> Yes, via deterministic fallback guidance endpoint and automatic fallback in /api/guidance.</p>
-      <p><strong>Does it support image and voice?</strong> Yes. Image upload is validated server-side; voice uses browser speech APIs when available.</p>
-      <p><strong>Tech stack?</strong> FastAPI, Qwen OpenAI-compatible API, plain HTML/CSS/JS frontend.</p>
-    </section>
-
-    <footer>
-      <p><a href="https://github.com/rudra496/sightlineai">GitHub</a> · <a href="https://devpost.com/">Devpost</a> · <a href="https://youtu.be/JQ796Gq9xMc">YouTube Demo</a> · <a href="mailto:rudrasarker125@gmail.com">Contact</a></p>
-    </footer>
-  </div>
+  <footer class="footer wrap">
+    <p>SightlineAI · Open Source · MIT License · Built with ❤️ for accessibility</p>
+    <p style="margin-top:0.5rem;">
+      <a href="https://github.com/rudra496">GitHub</a> ·
+      <a href="https://rudra496.github.io/site">Portfolio</a> ·
+      <a href="https://www.linkedin.com/in/rudrasarker">LinkedIn</a> ·
+      <a href="https://x.com/Rudra496">Twitter/X</a> ·
+      <a href="mailto:rudrasarker130@gmail.com">Email</a>
+    </p>
+    <p style="margin-top:0.5rem; font-size:0.75rem;">
+      © 2025–2026 Rudra Sarker · 3rd-year IPE, SUST · Founder of SightlineAI & MindWell
+    </p>
+  </footer>
 </body>
 </html>

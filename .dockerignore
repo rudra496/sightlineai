@@ -1,0 +1,10 @@
+.git/
+.github/
+__pycache__/
+*.pyc
+.env
+.env.*
+.venv/
+node_modules/
+*.db
+data/

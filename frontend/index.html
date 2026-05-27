@@ -10,6 +10,12 @@
   <body>
     <a href="#scene" class="skip-link">Skip to scene input</a>
 
+    <!-- Toast container -->
+    <div id="toastContainer" class="toast-container" aria-live="polite" aria-atomic="true"></div>
+
+    <!-- Scroll to top -->
+    <button id="scrollTopBtn" class="scroll-top-btn" aria-label="Scroll to top" type="button">↑</button>
+
     <header class="hero" aria-labelledby="app-title">
       <p class="eyebrow">Accessibility-first AI guidance</p>
       <h1 id="app-title">SightlineAI</h1>
@@ -21,6 +27,29 @@
     </header>
 
     <main id="workspace" class="layout" aria-label="SightlineAI workspace">
+      <!-- Settings bar -->
+      <section class="card settings-bar" aria-label="Settings">
+        <div class="settings-row">
+          <div>
+            <label for="languageSelect">🌐 Language</label>
+            <select id="languageSelect">
+              <option value="en">English</option>
+              <option value="bn">বাংলা (Bangla)</option>
+              <option value="ar">العربية (Arabic)</option>
+              <option value="es">Español (Spanish)</option>
+            </select>
+          </div>
+          <div>
+            <label for="modeSelect">💬 Mode</label>
+            <select id="modeSelect">
+              <option value="single">Single query</option>
+              <option value="conversation">Conversation</option>
+            </select>
+          </div>
+          <div class="session-info" id="sessionInfo"></div>
+        </div>
+      </section>
+
       <section class="card" aria-label="Guidance inputs">
         <h2>Scene input</h2>
         <p class="helper">Use text, voice, and optional route context. Keyboard shortcut: <kbd>Ctrl</kbd>/<kbd>⌘</kbd> + <kbd>Enter</kbd>.</p>
@@ -31,7 +60,7 @@
             <textarea id="scene" rows="6" maxlength="2000" aria-describedby="charCount status" placeholder="Example: I am near an intersection with scooters on my left and a barrier ahead."></textarea>
             <div class="meta-row">
               <span id="charCount" class="muted">0 / 2000</span>
-              <button id="voiceBtn" type="button" class="btn ghost" aria-pressed="false" aria-label="Toggle voice input">🎙️ Voice input</button>
+              <button id="voiceBtn" type="button" class="btn ghost" aria-pressed="false" aria-label="Toggle voice input"><span aria-hidden="true">🎙️</span> <span>Voice input</span></button>
             </div>
           </div>
           <div>
@@ -44,7 +73,7 @@
           </div>
         </div>
 
-        <div class="chip-row" aria-label="Example prompts">
+        <div class="chip-row" aria-label="Example prompts" role="group">
           <button type="button" class="chip" data-example="I am in front of a bus stop with moving traffic on the left and a post ahead.">Bus stop</button>
           <button type="button" class="chip" data-example="I am inside a grocery aisle and hear carts approaching from behind.">Grocery aisle</button>
           <button type="button" class="chip" data-example="I am at the top of stairs in a train station and only feel a handrail on the right.">Station stairs</button>
@@ -53,19 +82,22 @@
         <div class="actions">
           <button id="analyzeBtn" type="button" class="btn">Analyze scene</button>
           <button id="fallbackBtn" type="button" class="btn ghost">Force offline fallback</button>
-          <button id="speakBtn" type="button" class="btn ghost" disabled>Speak guidance</button>
-          <button id="copyBtn" type="button" class="btn ghost" disabled>Copy response</button>
-          <button id="pinBtn" type="button" class="btn ghost" disabled>Pin to memory</button>
+          <button id="accessibilityBtn" type="button" class="btn ghost">♿ Accessibility score</button>
+          <button id="speakBtn" type="button" class="btn ghost" disabled aria-label="Speak guidance aloud"><span aria-hidden="true">🔊</span> <span>Speak guidance</span></button>
+          <button id="copyBtn" type="button" class="btn ghost" disabled aria-label="Copy response to clipboard"><span aria-hidden="true">📋</span> <span>Copy response</span></button>
+          <button id="pinBtn" type="button" class="btn ghost" disabled aria-label="Pin to session memory"><span aria-hidden="true">📌</span> <span>Pin to memory</span></button>
+          <button id="favoriteBtn" type="button" class="btn ghost" disabled aria-label="Favorite this guidance"><span aria-hidden="true">⭐</span> <span>Favorite</span></button>
         </div>
 
-        <div id="status" role="status" aria-live="polite" class="status"></div>
+        <div id="status" role="alert" aria-live="polite" class="status"></div>
       </section>
 
       <section class="card" aria-label="Image analysis">
         <h2>Image input</h2>
-        <p class="helper">Upload JPG/PNG/WEBP up to 5 MB. Add a hint for better fallback guidance.</p>
+        <p class="helper">Upload JPG/PNG/WEBP up to 5 MB. AI vision analysis when API key is configured.</p>
         <label for="imageInput">Image file</label>
         <input id="imageInput" type="file" accept="image/png,image/jpeg,image/webp" />
+        <img id="imagePreview" class="image-preview" alt="Uploaded image preview" />
         <label for="imageHint">Image hint (optional)</label>
         <input id="imageHint" type="text" maxlength="200" placeholder="Crosswalk with parked scooters" />
         <div class="actions">
@@ -78,25 +110,58 @@
           <h2>Guidance response</h2>
           <span id="modeBadge" class="badge">No response</span>
         </div>
-        <div id="responseGrid" class="response-grid">
+        <div id="responseGrid" class="response-grid" aria-live="polite" role="region" aria-label="Analysis results">
           <article class="response-card empty">
             <p>Run scene or image analysis to see guidance, safety notes, and confidence details.</p>
           </article>
+        </div>
+
+        <!-- Accessibility score section -->
+        <div id="accessibilitySection" class="accessibility-section" style="display:none;">
+          <h3>♿ Accessibility Score</h3>
+          <div class="accessibility-grid">
+            <div class="score-card">
+              <span class="score-label">Obstacle Density</span>
+              <span id="obstacleDensity" class="score-value">--</span>
+            </div>
+            <div class="score-card">
+              <span class="score-label">Path Clarity</span>
+              <span id="pathClarity" class="score-value">--</span>
+            </div>
+            <div class="score-card">
+              <span class="score-label">Overall Score</span>
+              <span id="overallScore" class="score-value">--</span>
+            </div>
+          </div>
+          <div id="sensoryCues" class="sensory-cues"></div>
+          <div id="recommendations" class="recommendations"></div>
         </div>
       </section>
 
       <aside class="card" aria-label="Session memory">
         <div class="heading-row">
           <h2>Session memory</h2>
-          <button id="clearHistoryBtn" class="btn ghost" type="button">Clear</button>
+          <div class="heading-actions">
+            <select id="historyFilter" aria-label="Filter history">
+              <option value="all">All</option>
+              <option value="favorites">⭐ Favorites</option>
+              <option value="pinned">📌 Pinned</option>
+            </select>
+            <button id="clearHistoryBtn" class="btn ghost" type="button" aria-label="Clear all session memory">Clear</button>
+          </div>
         </div>
-        <p class="helper">Local memory is stored in your browser for quick revisit and pinning.</p>
-        <ul id="historyList" class="history-list" aria-live="polite"></ul>
+        <p class="helper">Local memory with pinning and favorites.</p>
+        <div class="actions" style="margin-top:0.5rem">
+          <button id="exportJsonBtn" type="button" class="btn ghost" style="font-size:0.75rem">Export JSON</button>
+          <button id="exportCsvBtn" type="button" class="btn ghost" style="font-size:0.75rem">Export CSV</button>
+          <button id="exportMdBtn" type="button" class="btn ghost" style="font-size:0.75rem">Export Markdown</button>
+        </div>
+        <ul id="historyList" class="history-list" role="log" aria-label="Session history"></ul>
       </aside>
     </main>
 
     <footer class="footer">
-      <p>SightlineAI · Qwen-compatible + deterministic fallback · Built for accessible, low-connectivity guidance.</p>
+      <p>SightlineAI · Qwen-powered + deterministic fallback · Voice · Vision · Multi-language · WebSocket</p>
     </footer>
 
     <script src="/frontend/app.js"></script>
