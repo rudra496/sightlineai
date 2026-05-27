@@ -6,9 +6,7 @@ from typing import Any
 
 from app.schemas import GuidanceResponse
 
-
 JSON_BLOCK_PATTERN = re.compile(r"\{.*\}", re.DOTALL)
-
 
 
 def extract_json_object(text: str) -> dict[str, Any]:
@@ -39,7 +37,6 @@ def extract_json_object(text: str) -> dict[str, Any]:
     return obj
 
 
-
 def normalize_guidance_payload(payload: dict[str, Any]) -> GuidanceResponse:
     def _clean(value: Any, fallback: str) -> str:
         if isinstance(value, str):
@@ -51,14 +48,15 @@ def normalize_guidance_payload(payload: dict[str, Any]) -> GuidanceResponse:
     return GuidanceResponse(
         guidance_text=_clean(
             payload.get("guidance_text"),
-            "I could not confidently interpret the scene. Please provide more detail."
+            "I could not confidently interpret the scene. Please provide more detail.",
         ),
         safety_notes=_clean(
             payload.get("safety_notes"),
-            "Stay cautious, move slowly, and verify surroundings before each step."
+            "Stay cautious, move slowly, and verify surroundings before each step.",
         ),
         confidence_notes=_clean(
             payload.get("confidence_notes"),
-            "Low confidence due to limited scene details."
+            "Low confidence due to limited scene details.",
         ),
+        mode="qwen",
     )

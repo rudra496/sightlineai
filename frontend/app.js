@@ -1,216 +1,309 @@
-/* global speechSynthesis, SpeechSynthesisUtterance */
+/* global speechSynthesis, SpeechSynthesisUtterance, webkitSpeechRecognition */
 
-const sceneInput     = document.getElementById("scene");
-const analyzeBtn     = document.getElementById("analyzeBtn");
-const speakBtn       = document.getElementById("speakBtn");
-const copyBtn        = document.getElementById("copyBtn");
-const statusEl       = document.getElementById("status");
-const outputEl       = document.getElementById("output");
-const charCountEl    = document.getElementById("charCount");
-const skeletonEl     = document.getElementById("loadingSkeleton");
-const exampleChips   = document.querySelectorAll(".example-chip");
+const sceneInput = document.getElementById("scene");
+const locationInput = document.getElementById("locationLabel");
+const routeInput = document.getElementById("routeDescription");
+const hazardsInput = document.getElementById("knownHazards");
+const analyzeBtn = document.getElementById("analyzeBtn");
+const fallbackBtn = document.getElementById("fallbackBtn");
+const voiceBtn = document.getElementById("voiceBtn");
+const speakBtn = document.getElementById("speakBtn");
+const copyBtn = document.getElementById("copyBtn");
+const pinBtn = document.getElementById("pinBtn");
+const imageAnalyzeBtn = document.getElementById("imageAnalyzeBtn");
+const imageInput = document.getElementById("imageInput");
+const imageHintInput = document.getElementById("imageHint");
+const charCount = document.getElementById("charCount");
+const statusEl = document.getElementById("status");
+const responseGrid = document.getElementById("responseGrid");
+const modeBadge = document.getElementById("modeBadge");
+const historyList = document.getElementById("historyList");
+const clearHistoryBtn = document.getElementById("clearHistoryBtn");
 
-const MAX_CHARS = 2000;
+const HISTORY_KEY = "sightlineai-history-v1";
+const MAX_HISTORY = 20;
 
-/** @type {{ guidance_text: string, safety_notes: string, confidence_notes: string } | null} */
 let latestData = null;
+let recognition = null;
+let listening = false;
 
-// ── Utility helpers ──────────────────────────────────────────────────────────
-
-function setStatus(message, type = "") {
-  statusEl.textContent = message;
-  statusEl.className = "status-bar" + (type ? " " + type : "");
-
-  // Show/hide spinner
-  const existing = statusEl.querySelector(".spinner");
-  if (type === "loading") {
-    if (!existing) {
-      const spinner = document.createElement("span");
-      spinner.className = "spinner";
-      spinner.setAttribute("aria-hidden", "true");
-      statusEl.prepend(spinner);
-    }
-  } else if (existing) {
-    existing.remove();
-  }
+function setStatus(text, kind = "") {
+  statusEl.textContent = text;
+  statusEl.className = `status${kind ? ` ${kind}` : ""}`;
 }
 
-function updateCharCount() {
-  const len = sceneInput.value.length;
-  charCountEl.textContent = `${len} / ${MAX_CHARS}`;
-  charCountEl.className = "char-count" +
-    (len >= MAX_CHARS ? " at-limit" : len >= MAX_CHARS * 0.85 ? " near-limit" : "");
+function buildGeoContext() {
+  const knownHazards = hazardsInput.value
+    .split(",")
+    .map((x) => x.trim())
+    .filter(Boolean)
+    .slice(0, 8);
 
-  // Announce limit milestones accessibly via the status bar
-  if (len === MAX_CHARS) {
-    setStatus("Character limit reached (2000).", "error");
-  } else if (len === Math.floor(MAX_CHARS * 0.9)) {
-    setStatus("Approaching character limit.", "");
-  }
+  return {
+    location_label: locationInput.value.trim() || null,
+    route_description: routeInput.value.trim() || null,
+    known_hazards: knownHazards,
+  };
 }
 
-// ── Output rendering ─────────────────────────────────────────────────────────
-
-function renderEmptyState() {
-  outputEl.innerHTML = `
-    <div class="output-block empty-state">
-      <p>Enter a scene description above and click <strong>Analyze Scene</strong> to receive accessibility guidance.</p>
-    </div>`;
-  latestData = null;
-  speakBtn.disabled = true;
-  copyBtn.disabled = true;
-}
-
-/**
- * @param {{ guidance_text: string, safety_notes: string, confidence_notes: string }} data
- */
-function renderOutput(data) {
+function renderResponse(data) {
   latestData = data;
-  outputEl.replaceChildren();
+  modeBadge.textContent = `${data.mode || "unknown"} · risk ${data.risk_score ?? "--"}/100`;
 
   const blocks = [
-    {
-      cls: "guidance",
-      icon: "🧭",
-      label: "Guidance",
-      value: data.guidance_text ?? "--",
-    },
-    {
-      cls: "safety",
-      icon: "⚠️",
-      label: "Safety Notes",
-      value: data.safety_notes ?? "--",
-    },
-    {
-      cls: "confidence",
-      icon: "📊",
-      label: "Confidence Notes",
-      value: data.confidence_notes ?? "--",
-    },
+    ["Guidance", data.guidance_text],
+    ["Safety notes", data.safety_notes],
+    ["Confidence notes", data.confidence_notes],
   ];
 
-  blocks.forEach(({ cls, icon, label, value }) => {
-    const block = document.createElement("div");
-    block.className = `output-block ${cls}`;
+  responseGrid.innerHTML = blocks
+    .map(([title, value]) => `<article class="response-card"><strong>${title}</strong><p>${value || "--"}</p></article>`)
+    .join("");
 
-    const labelEl = document.createElement("div");
-    labelEl.className = "output-block-label";
-    labelEl.setAttribute("aria-hidden", "true");
-    labelEl.textContent = `${icon} ${label}`;
+  if (data.image_summary) {
+    responseGrid.insertAdjacentHTML(
+      "beforeend",
+      `<article class="response-card"><strong>Image summary</strong><p>${data.image_summary}</p></article>`,
+    );
+  }
 
-    const textEl = document.createElement("p");
-    textEl.className = "output-block-text";
-    textEl.textContent = value;
-
-    block.appendChild(labelEl);
-    block.appendChild(textEl);
-    outputEl.appendChild(block);
-  });
-
-  const hasSpeech = "speechSynthesis" in window;
-  speakBtn.disabled = !hasSpeech || !data.guidance_text;
+  speakBtn.disabled = !("speechSynthesis" in window);
   copyBtn.disabled = false;
-}
+  pinBtn.disabled = false;
 
-// ── Error output ─────────────────────────────────────────────────────────────
-
-function renderError() {
-  renderOutput({
-    guidance_text: "Unable to generate guidance right now.",
-    safety_notes: "Stay still, use your cane or support, and try again in a moment.",
-    confidence_notes: "No confidence — guidance unavailable due to a request failure.",
+  persistHistory({
+    id: crypto.randomUUID(),
+    created_at: new Date().toISOString(),
+    scene: sceneInput.value.trim() || imageHintInput.value.trim() || "Image analysis",
+    guidance: data,
+    pinned: false,
   });
 }
 
-// ── API call ─────────────────────────────────────────────────────────────────
+function safeFallbackResponse(message) {
+  return {
+    guidance_text: "Fallback mode: pause, orient using cane sweep, and move in short controlled steps.",
+    safety_notes: message || "Use tactile and audio confirmation before moving into uncertain space.",
+    confidence_notes: "Low confidence because live AI response was unavailable.",
+    mode: "fallback",
+    fallback_reason: "frontend_error",
+    risk_score: 50,
+  };
+}
 
-async function analyzeScene() {
-  const sceneDescription = sceneInput.value.trim();
-  if (!sceneDescription) {
-    setStatus("Please describe your scene first.", "error");
+async function postJson(url, body) {
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(data.detail || "Request failed");
+  }
+  return data;
+}
+
+async function analyzeScene(forceFallback = false) {
+  const scene = sceneInput.value.trim();
+  if (!scene) {
+    setStatus("Please add a scene description first.", "error");
     sceneInput.focus();
     return;
   }
 
   analyzeBtn.disabled = true;
-  speakBtn.disabled   = true;
-  copyBtn.disabled    = true;
-  skeletonEl.hidden   = false;
-  skeletonEl.removeAttribute("aria-hidden");
-  setStatus("Analyzing scene…", "loading");
+  fallbackBtn.disabled = true;
+  setStatus(forceFallback ? "Running deterministic fallback…" : "Analyzing scene…");
 
   try {
-    const response = await fetch("/api/guidance", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ scene_description: sceneDescription }),
+    const url = forceFallback ? "/api/fallback-guidance" : "/api/guidance";
+    const data = await postJson(url, {
+      scene_description: scene,
+      geospatial_context: buildGeoContext(),
     });
-
-    const body = await response.json();
-    if (!response.ok) {
-      const detail = typeof body?.detail === "string" ? body.detail : "Request failed";
-      throw new Error(detail);
-    }
-
-    renderOutput(body);
+    renderResponse(data);
     setStatus("Guidance ready.", "success");
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown error occurred.";
-    renderError();
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Request failed.";
+    const fallback = safeFallbackResponse(message);
+    renderResponse(fallback);
     setStatus(message, "error");
   } finally {
     analyzeBtn.disabled = false;
-    skeletonEl.hidden = true;
-    skeletonEl.setAttribute("aria-hidden", "true");
+    fallbackBtn.disabled = false;
   }
 }
 
-// ── Speech synthesis ─────────────────────────────────────────────────────────
+async function analyzeImage() {
+  const file = imageInput.files?.[0];
+  if (!file) {
+    setStatus("Please choose an image first.", "error");
+    return;
+  }
 
-function buildSpeechText(data) {
-  const parts = [];
-  if (data.guidance_text) parts.push(`Guidance: ${data.guidance_text}`);
-  if (data.safety_notes)  parts.push(`Safety notes: ${data.safety_notes}`);
-  if (data.confidence_notes) parts.push(`Confidence: ${data.confidence_notes}`);
-  return parts.join(". ");
-}
+  imageAnalyzeBtn.disabled = true;
+  setStatus("Uploading image for analysis…");
 
-function speakGuidance() {
-  if (!("speechSynthesis" in window) || !latestData) return;
-
-  window.speechSynthesis.cancel();
-  const utterance = new SpeechSynthesisUtterance(buildSpeechText(latestData));
-  utterance.rate  = 1.0;
-  utterance.pitch = 1.0;
-  utterance.lang  = "en-US";
-  window.speechSynthesis.speak(utterance);
-}
-
-// ── Copy to clipboard ────────────────────────────────────────────────────────
-
-async function copyGuidance() {
-  if (!latestData) return;
-
-  const text = [
-    `Guidance: ${latestData.guidance_text}`,
-    `Safety notes: ${latestData.safety_notes}`,
-    `Confidence: ${latestData.confidence_notes}`,
-  ].join("\n\n");
+  const formData = new FormData();
+  formData.append("image", file);
+  formData.append("text_hint", imageHintInput.value.trim());
+  formData.append("location_label", locationInput.value.trim());
+  formData.append("route_description", routeInput.value.trim());
 
   try {
-    await navigator.clipboard.writeText(text);
-    copyBtn.innerHTML = '<span class="btn-icon" aria-hidden="true">✅</span> Copied!';
-    setTimeout(() => {
-      copyBtn.innerHTML = '<span class="btn-icon" aria-hidden="true">📋</span> Copy';
-    }, 2000);
-  } catch {
-    setStatus("Copy failed — please copy the text manually.", "error");
+    const res = await fetch("/api/analyze-image", { method: "POST", body: formData });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || "Image analysis failed");
+    renderResponse(data);
+    setStatus("Image guidance ready.", "success");
+  } catch (err) {
+    setStatus(err instanceof Error ? err.message : "Image request failed", "error");
+  } finally {
+    imageAnalyzeBtn.disabled = false;
   }
 }
 
-// ── Example chips ────────────────────────────────────────────────────────────
+function speakResponse() {
+  if (!("speechSynthesis" in window) || !latestData) return;
+  window.speechSynthesis.cancel();
+  const text = [latestData.guidance_text, latestData.safety_notes, latestData.confidence_notes].join(". ");
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = "en-US";
+  window.speechSynthesis.speak(utter);
+}
 
-exampleChips.forEach((chip) => {
+async function copyResponse() {
+  if (!latestData) return;
+  const text = `Guidance: ${latestData.guidance_text}\n\nSafety: ${latestData.safety_notes}\n\nConfidence: ${latestData.confidence_notes}`;
+  try {
+    await navigator.clipboard.writeText(text);
+    setStatus("Response copied.", "success");
+  } catch {
+    setStatus("Clipboard unavailable.", "error");
+  }
+}
+
+function readHistory() {
+  try {
+    return JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]");
+  } catch {
+    return [];
+  }
+}
+
+function writeHistory(items) {
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(items.slice(0, MAX_HISTORY)));
+}
+
+function persistHistory(item) {
+  const items = [item, ...readHistory()].slice(0, MAX_HISTORY);
+  writeHistory(items);
+  renderHistory();
+}
+
+function pinLatest() {
+  if (!latestData) return;
+  const items = readHistory();
+  if (!items.length) return;
+  items[0].pinned = true;
+  writeHistory(items);
+  renderHistory();
+  setStatus("Pinned latest guidance.", "success");
+}
+
+function renderHistory() {
+  const items = readHistory();
+  if (!items.length) {
+    historyList.innerHTML = '<li class="history-item">No session memory yet.</li>';
+    return;
+  }
+
+  historyList.innerHTML = items
+    .map((item, idx) => {
+      const pinLabel = item.pinned ? "📌 Pinned" : "Pin";
+      return `
+        <li class="history-item">
+          <strong>${item.pinned ? "📌 " : ""}${new Date(item.created_at).toLocaleString()}</strong>
+          <p>${item.scene}</p>
+          <button class="btn ghost history-restore" data-index="${idx}">Restore</button>
+          <button class="btn ghost history-pin" data-index="${idx}">${pinLabel}</button>
+        </li>`;
+    })
+    .join("");
+}
+
+function restoreHistory(index) {
+  const item = readHistory()[index];
+  if (!item) return;
+  sceneInput.value = item.scene;
+  renderResponse(item.guidance);
+  setStatus("History item restored.", "success");
+}
+
+function pinHistory(index) {
+  const items = readHistory();
+  if (!items[index]) return;
+  items[index].pinned = !items[index].pinned;
+  writeHistory(items);
+  renderHistory();
+}
+
+function clearHistory() {
+  localStorage.removeItem(HISTORY_KEY);
+  renderHistory();
+  setStatus("Local history cleared.", "success");
+}
+
+function initVoice() {
+  const SpeechRecognition = window.SpeechRecognition || webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    voiceBtn.disabled = true;
+    voiceBtn.textContent = "🎙️ Voice unavailable";
+    return;
+  }
+
+  recognition = new SpeechRecognition();
+  recognition.lang = "en-US";
+  recognition.continuous = false;
+  recognition.interimResults = false;
+
+  recognition.onstart = () => {
+    listening = true;
+    voiceBtn.setAttribute("aria-pressed", "true");
+    voiceBtn.textContent = "⏹ Stop listening";
+    setStatus("Listening… speak now.");
+  };
+
+  recognition.onend = () => {
+    listening = false;
+    voiceBtn.setAttribute("aria-pressed", "false");
+    voiceBtn.textContent = "🎙️ Voice input";
+  };
+
+  recognition.onresult = (event) => {
+    const transcript = event.results?.[0]?.[0]?.transcript?.trim();
+    if (!transcript) return;
+    sceneInput.value = sceneInput.value ? `${sceneInput.value} ${transcript}` : transcript;
+    updateCharCount();
+    setStatus("Voice captured.", "success");
+  };
+
+  recognition.onerror = () => setStatus("Voice recognition error. You can continue with text input.", "error");
+}
+
+function toggleVoice() {
+  if (!recognition) return;
+  if (listening) recognition.stop();
+  else recognition.start();
+}
+
+function updateCharCount() {
+  charCount.textContent = `${sceneInput.value.length} / 2000`;
+}
+
+document.querySelectorAll(".chip").forEach((chip) => {
   chip.addEventListener("click", () => {
     sceneInput.value = chip.dataset.example || "";
     updateCharCount();
@@ -218,20 +311,26 @@ exampleChips.forEach((chip) => {
   });
 });
 
-// ── Event listeners ──────────────────────────────────────────────────────────
-
-analyzeBtn.addEventListener("click", analyzeScene);
-speakBtn.addEventListener("click", speakGuidance);
-copyBtn.addEventListener("click", copyGuidance);
-
+analyzeBtn.addEventListener("click", () => analyzeScene(false));
+fallbackBtn.addEventListener("click", () => analyzeScene(true));
+imageAnalyzeBtn.addEventListener("click", analyzeImage);
+voiceBtn.addEventListener("click", toggleVoice);
+speakBtn.addEventListener("click", speakResponse);
+copyBtn.addEventListener("click", copyResponse);
+pinBtn.addEventListener("click", pinLatest);
+clearHistoryBtn.addEventListener("click", clearHistory);
+sceneInput.addEventListener("input", updateCharCount);
 sceneInput.addEventListener("keydown", (event) => {
-  if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
-    analyzeScene();
-  }
+  if ((event.ctrlKey || event.metaKey) && event.key === "Enter") analyzeScene(false);
 });
 
-sceneInput.addEventListener("input", updateCharCount);
+document.addEventListener("click", (event) => {
+  const restoreBtn = event.target.closest(".history-restore");
+  const pinBtnEl = event.target.closest(".history-pin");
+  if (restoreBtn) restoreHistory(Number(restoreBtn.dataset.index));
+  if (pinBtnEl) pinHistory(Number(pinBtnEl.dataset.index));
+});
 
-// ── Init ─────────────────────────────────────────────────────────────────────
-
+renderHistory();
+initVoice();
 updateCharCount();

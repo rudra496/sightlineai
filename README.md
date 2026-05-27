@@ -1,201 +1,151 @@
 # SightlineAI
 
-> **Qwen-powered environmental guidance for blind and visually impaired users.**
+SightlineAI is an accessibility-first AI assistant for blind and visually impaired users. It combines Qwen-powered guidance with deterministic fallback behavior so demos and real usage remain functional even in low-connectivity environments.
 
-[![Python 3.11+](https://img.shields.io/badge/Python-3.11%2B-blue?logo=python&logoColor=white)](https://www.python.org/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.111%2B-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
-[![Powered by Qwen](https://img.shields.io/badge/AI-Qwen%20via%20DashScope-ff6a00?logo=alibabadotcom&logoColor=white)](https://dashscope.console.aliyun.com/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+## What it solves
 
-SightlineAI is a hackathon-ready accessibility AI assistant built for the **Global AI Hackathon Series with Qwen Cloud**. It turns a plain-language scene description into structured, safety-focused environmental guidance — helping blind and visually impaired users navigate their surroundings with greater confidence.
+SightlineAI turns scene context into structured, safety-focused guidance:
+- `guidance_text`: what to do next
+- `safety_notes`: hazards to watch for
+- `confidence_notes`: reliability caveats
 
----
+## Core features
 
-## ✨ Features
+- Qwen-compatible guidance endpoint with strict request/response models
+- Offline fallback guidance (automatic and manual)
+- Image upload flow with safe type/size validation
+- Voice-first frontend mode (speech recognition + speech synthesis)
+- Geospatial context support with heuristic risk scoring
+- Edge AI context endpoint for future on-device sensor fusion
+- Session history APIs + local memory panel in frontend
+- Public landing/docs page for judges and contributors
 
-| Feature | Description |
-|---|---|
-| 🧭 **Structured guidance** | Three-part JSON response: `guidance_text`, `safety_notes`, `confidence_notes` |
-| 🔊 **Text-to-speech** | Browser speech synthesis reads all guidance sections aloud |
-| 📋 **Copy to clipboard** | One-click copy of complete guidance for sharing or logging |
-| ⚡ **Example prompts** | Pre-loaded scene chips to demo the AI instantly |
-| ♿ **Accessible UI** | Skip-link, ARIA live regions, focus rings, keyboard shortcut (`Ctrl`/`⌘`+`Enter`) |
-| 📱 **Mobile responsive** | Scales cleanly from phone to desktop |
-| 🛡️ **Robust error handling** | Graceful fallbacks for missing API key, timeout, network and parse failures |
-| 🔑 **No hardcoded secrets** | API key read exclusively from environment variables |
+## What changed in this update
 
----
+- Added new APIs: `/api/analyze-image`, `/api/edge-context`, `/api/fallback-guidance`, `/api/session-history`
+- Implemented deterministic fallback pipeline and geospatial risk scoring
+- Added image validation service and edge context abstraction layer
+- Rebuilt frontend with image upload, voice controls, memory panel, and accessibility states
+- Replaced landing page with product-style docs website sections
+- Expanded docs: architecture, API, roadmap, usage, FAQ, security
 
-## 🏗️ Architecture
+## Architecture summary
 
-```
-User
- │  describes scene (text)
- ▼
-Frontend (HTML/CSS/JS)
- │  POST /api/guidance
- ▼
-FastAPI Backend
- │  validates input → builds prompt
- ▼
-Qwen API (DashScope, OpenAI-compatible)
- │  returns structured JSON
- ▼
-Frontend → displays cards + optional TTS
-```
+Frontend (`/frontend`) → FastAPI backend (`app/main.py`) → Qwen client (`app/qwen_client.py`) OR fallback service (`app/services/fallback_guidance.py`) → structured output + history store.
 
-For the full Mermaid diagram and workflow walkthrough see [docs/architecture.md](docs/architecture.md).
+See [docs/architecture.md](docs/architecture.md) for Mermaid flow.
 
----
-
-## 🚀 Quick Start
+## Setup
 
 ### Prerequisites
 
 - Python 3.11+
-- A [DashScope API key](https://dashscope.console.aliyun.com/) (free tier available)
+- Optional DashScope API key for live Qwen responses
 
-### 1 — Clone & install
+### Install
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/sightlineai.git
-cd sightlineai
 python3 -m venv .venv
-source .venv/bin/activate      # Windows: .venv\Scripts\activate
+source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 2 — Configure environment
+### Environment
 
 ```bash
 cp .env.example .env
-# Open .env and set DASHSCOPE_API_KEY to your key
 ```
 
-| Variable | Required | Default | Description |
+| Variable | Required | Default | Purpose |
 |---|---|---|---|
-| `DASHSCOPE_API_KEY` | ✅ yes | — | Your DashScope API key |
-| `DASHSCOPE_BASE_URL` | no | `https://dashscope-intl.aliyuncs.com/compatible-mode/v1` | OpenAI-compatible base URL |
-| `QWEN_MODEL` | no | `qwen3.7-max` | Qwen model identifier |
-| `QWEN_TIMEOUT_SECONDS` | no | `25` | Request timeout in seconds |
+| `DASHSCOPE_API_KEY` | Optional | — | Enables live Qwen guidance |
+| `DASHSCOPE_BASE_URL` | No | DashScope compat URL | OpenAI-compatible base URL |
+| `QWEN_MODEL` | No | `qwen3.7-max` | Qwen model name |
+| `QWEN_TIMEOUT_SECONDS` | No | `25` | Upstream timeout |
+| `MAX_IMAGE_BYTES` | No | `5242880` | Max image upload size |
 
-### 3 — Run
+## Run locally
 
 ```bash
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-Open **http://localhost:8000** in your browser.
+- App UI: `http://localhost:8000`
+- Product site/docs page: `http://localhost:8000/frontend/` (interactive app), `index.html` for GitHub Pages
 
----
+## API endpoints
 
-## 🔌 API Reference
+- `GET /api/health`
+- `POST /api/guidance`
+- `POST /api/fallback-guidance`
+- `POST /api/analyze-image`
+- `POST /api/edge-context`
+- `GET /api/session-history`
+- `POST /api/session-history`
+- `DELETE /api/session-history`
 
-### `POST /api/guidance`
+Detailed payloads: [docs/api.md](docs/api.md)
 
-**Request**
+## Workflows
 
-```json
-{
-  "scene_description": "I am at a bus stop with a pole in front of me and traffic to my left."
-}
-```
+### Image input workflow
+1. Upload image in frontend.
+2. Backend validates MIME/signature/size.
+3. Fallback analysis returns structured guidance + image summary.
 
-Field constraints: `scene_description` must be 5–2000 characters.
+### Voice workflow
+1. Browser speech recognition fills scene text (if supported).
+2. User submits scene guidance.
+3. Speech synthesis can read output aloud.
 
-**Response `200 OK`**
+### Memory/history workflow
+1. Every guidance response is stored in local browser history.
+2. Backend also tracks in-memory session history.
+3. Users can restore, pin, or clear recent responses.
 
-```json
-{
-  "guidance_text": "Step back half a pace to clear the pole, orient away from traffic, and use your cane to confirm the path forward before moving.",
-  "safety_notes": "Obstacle directly ahead (pole) and moving traffic on your left — both increase collision risk.",
-  "confidence_notes": "Moderate confidence from text context; verify with cane or tactile contact before each step."
-}
-```
+### Fallback behavior
+- `/api/guidance` automatically returns fallback output when Qwen is unavailable.
+- `/api/fallback-guidance` forces deterministic fallback mode for demos.
+- Fallback output is explicitly labeled (`mode: "fallback"`).
 
-**Error responses**
+### Edge-AI-ready layer
+- `/api/edge-context` accepts sensor-like payloads and returns risk score + actions.
+- Service abstraction in `app/services/edge_context.py` is ready for future hardware adapters.
 
-| Status | `error` field | Cause |
-|---|---|---|
-| 400 | `invalid_input` | Missing or too-short/long `scene_description` |
-| 502 | `upstream_api_error` | Qwen API timeout or HTTP error |
-| 503 | `configuration_error` | `DASHSCOPE_API_KEY` not set |
-| 500 | `qwen_client_error` | Response parse failure |
+### Geospatial context
+- Optional `geospatial_context` in guidance requests influences risk scoring.
+- Heuristic scoring is intentionally conservative and documented as non-navigation-grade.
 
-### `GET /api/health`
+## Limitations
 
-```json
-{ "status": "ok", "service": "SightlineAI", "model": "qwen3.7-max" }
-```
+- Image pathway currently uses validated metadata + text hints (OCR not yet enabled).
+- Session history store is in-memory and resets on backend restart.
+- Geospatial scoring is heuristic, not map-verified navigation.
+- Voice input depends on browser speech API availability.
 
----
+## Security notes
 
-## 🧪 Smoke Test
+- No hardcoded API keys.
+- `.env` ignored via `.gitignore`.
+- Bounded image uploads and strict schema validation.
+- Structured request ID headers for error tracing.
 
-Verify the integration without running the full server:
+See [docs/security.md](docs/security.md).
+
+## Smoke checks
 
 ```bash
-# Checks config only (no API call)
 python scripts/smoke_test.py
-
-# Performs a real Qwen API call (requires DASHSCOPE_API_KEY)
 python scripts/smoke_test.py --live
-
-# Custom scene
-python scripts/smoke_test.py --live --scene "I am on a narrow footbridge with railings on both sides."
+python scripts/self_check.py
 ```
 
----
+## Demo links
 
-## 📂 Project Structure
+- GitHub: https://github.com/rudra496/sightlineai
+- Demo video: https://youtu.be/JQ796Gq9xMc
 
-```
-sightlineai/
-├── app/
-│   ├── config.py          # Settings loaded from environment variables
-│   ├── main.py            # FastAPI app, routes, error handlers
-│   ├── prompts.py         # Qwen system + user prompt builders
-│   ├── qwen_client.py     # HTTP client with error classification
-│   ├── schemas.py         # Pydantic request/response models
-│   └── utils.py           # JSON extraction and response normalisation
-├── frontend/
-│   ├── index.html         # Accessible single-page UI
-│   ├── style.css          # Dark-theme responsive styles
-│   └── app.js             # Fetch, TTS, copy, example chips, char counter
-├── docs/
-│   └── architecture.md    # Mermaid diagram + workflow explanation
-├── scripts/
-│   └── smoke_test.py      # Offline/live integration smoke test
-├── .env.example           # Environment variable template
-└── requirements.txt       # Python dependencies
-```
+## Contributor notes
 
----
-
-## 🗺️ Roadmap
-
-- [ ] Camera / image input for multimodal scene analysis
-- [ ] Edge AI layer — on-device sensor fusion for real-time guidance
-- [ ] Offline fallback model for connectivity-limited environments
-- [ ] Geospatial context integration for route safety scoring
-- [ ] Conversation memory panel for session history
-- [ ] Audio-first input mode (voice → scene description)
-
----
-
-## 🤝 Contributing
-
-Contributions, bug reports, and feature requests are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) and follow the [Code of Conduct](CODE_OF_CONDUCT.md).
-
----
-
-## 🔒 Security
-
-No secrets are hardcoded. All credentials are loaded from environment variables via `python-dotenv`. See [SECURITY.md](SECURITY.md) for the vulnerability reporting process.
-
----
-
-## 📄 License
-
-[MIT](LICENSE) © 2024 SightlineAI Contributors
-
+- Keep accessibility-first UX and structured output contracts stable.
+- Add docs for every externally visible feature change.

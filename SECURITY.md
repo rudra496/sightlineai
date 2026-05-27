@@ -1,7 +1,14 @@
 # Security Policy
 
 ## Reporting
-If you find a vulnerability, please open a [Security Advisory](https://github.com/rudra496/sightlineai/security/advisories/new) rather than a public issue.
+If you discover a vulnerability, use GitHub Security Advisories:
+https://github.com/rudra496/sightlineai/security/advisories/new
 
-## Scope
-This is an open-source project. Do not publicly disclose vulnerabilities before they are fixed.
+## Current controls
+- Environment-only secret configuration
+- Structured validation and bounded request payloads
+- Safe image upload checks (type + size)
+- Consistent JSON error schema with request IDs
+
+## Out of scope
+- Any exploit requiring modified local source in a non-default environment.
