@@ -23,8 +23,8 @@ const clearHistoryBtn = document.getElementById("clearHistoryBtn");
 const HISTORY_KEY = "sightlineai-history-v1";
 const MAX_HISTORY = 20;
 
-let latestData = null;
-let recognition = null;
+let latestGuidanceResponse = null;
+let speechRecognition = null;
 let listening = false;
 
 function setStatus(text, kind = "") {
@@ -47,7 +47,7 @@ function buildGeoContext() {
 }
 
 function renderResponse(data) {
-  latestData = data;
+  latestGuidanceResponse = data;
   modeBadge.textContent = `${data.mode || "unknown"} · risk ${data.risk_score ?? "--"}/100`;
 
   const blocks = [
@@ -166,17 +166,17 @@ async function analyzeImage() {
 }
 
 function speakResponse() {
-  if (!("speechSynthesis" in window) || !latestData) return;
+  if (!("speechSynthesis" in window) || !latestGuidanceResponse) return;
   window.speechSynthesis.cancel();
-  const text = [latestData.guidance_text, latestData.safety_notes, latestData.confidence_notes].join(". ");
+  const text = [latestGuidanceResponse.guidance_text, latestGuidanceResponse.safety_notes, latestGuidanceResponse.confidence_notes].join(". ");
   const utter = new SpeechSynthesisUtterance(text);
   utter.lang = "en-US";
   window.speechSynthesis.speak(utter);
 }
 
 async function copyResponse() {
-  if (!latestData) return;
-  const text = `Guidance: ${latestData.guidance_text}\n\nSafety: ${latestData.safety_notes}\n\nConfidence: ${latestData.confidence_notes}`;
+  if (!latestGuidanceResponse) return;
+  const text = `Guidance: ${latestGuidanceResponse.guidance_text}\n\nSafety: ${latestGuidanceResponse.safety_notes}\n\nConfidence: ${latestGuidanceResponse.confidence_notes}`;
   try {
     await navigator.clipboard.writeText(text);
     setStatus("Response copied.", "success");
@@ -204,7 +204,7 @@ function persistHistory(item) {
 }
 
 function pinLatest() {
-  if (!latestData) return;
+  if (!latestGuidanceResponse) return;
   const items = readHistory();
   if (!items.length) return;
   items[0].pinned = true;
@@ -257,46 +257,46 @@ function clearHistory() {
 }
 
 function initVoice() {
-  const SpeechRecognition = window.SpeechRecognition || webkitSpeechRecognition;
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SpeechRecognition) {
     voiceBtn.disabled = true;
     voiceBtn.textContent = "🎙️ Voice unavailable";
     return;
   }
 
-  recognition = new SpeechRecognition();
-  recognition.lang = "en-US";
-  recognition.continuous = false;
-  recognition.interimResults = false;
+  speechRecognition = new SpeechRecognition();
+  speechRecognition.lang = "en-US";
+  speechRecognition.continuous = false;
+  speechRecognition.interimResults = false;
 
-  recognition.onstart = () => {
+  speechRecognition.onstart = () => {
     listening = true;
     voiceBtn.setAttribute("aria-pressed", "true");
     voiceBtn.textContent = "⏹ Stop listening";
     setStatus("Listening… speak now.");
   };
 
-  recognition.onend = () => {
+  speechRecognition.onend = () => {
     listening = false;
     voiceBtn.setAttribute("aria-pressed", "false");
     voiceBtn.textContent = "🎙️ Voice input";
   };
 
-  recognition.onresult = (event) => {
-    const transcript = event.results?.[0]?.[0]?.transcript?.trim();
+  speechRecognition.onresult = (event) => {
+    const transcript = event.results?.[0]?.[0]?.transcript?.trim() || "";
     if (!transcript) return;
     sceneInput.value = sceneInput.value ? `${sceneInput.value} ${transcript}` : transcript;
     updateCharCount();
     setStatus("Voice captured.", "success");
   };
 
-  recognition.onerror = () => setStatus("Voice recognition error. You can continue with text input.", "error");
+  speechRecognition.onerror = () => setStatus("Voice recognition error. You can continue with text input.", "error");
 }
 
 function toggleVoice() {
-  if (!recognition) return;
-  if (listening) recognition.stop();
-  else recognition.start();
+  if (!speechRecognition) return;
+  if (listening) speechRecognition.stop();
+  else speechRecognition.start();
 }
 
 function updateCharCount() {

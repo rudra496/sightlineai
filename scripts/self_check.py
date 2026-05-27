@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import json
+import os
 import subprocess
+import tempfile
 import time
 import urllib.error
 import urllib.request
@@ -23,10 +25,11 @@ def request_json(path: str, method: str = "GET", payload: dict | None = None, he
 
 
 def main() -> int:
+    stderr_log = tempfile.NamedTemporaryFile(mode="w+", delete=False, suffix="-sightline-selfcheck.log")
     process = subprocess.Popen(
         ["uvicorn", "app.main:app", "--host", "127.0.0.1", "--port", "8142"],
         stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
+        stderr=stderr_log,
     )
 
     try:
@@ -68,7 +71,17 @@ def main() -> int:
         return 1 if fail_count else 0
     finally:
         process.terminate()
-        process.wait(timeout=5)
+        try:
+            process.wait(timeout=5)
+        except subprocess.TimeoutExpired:
+            process.kill()
+            try:
+                process.wait(timeout=3)
+            except subprocess.TimeoutExpired:
+                pass
+        stderr_log.close()
+        if os.path.exists(stderr_log.name):
+            os.unlink(stderr_log.name)
 
 
 if __name__ == "__main__":

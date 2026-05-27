@@ -7,7 +7,7 @@ from uuid import uuid4
 from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 
 from app.config import get_settings
@@ -51,7 +51,7 @@ app.add_middleware(
 
 
 @app.middleware("http")
-async def add_request_id(request: Request, call_next):
+async def add_request_id(request: Request, call_next) -> Response:
     request_id = str(uuid4())
     request.state.request_id = request_id
     response = await call_next(request)
@@ -107,8 +107,8 @@ def health() -> dict[str, str]:
     responses={400: {"model": ErrorResponse}, 500: {"model": ErrorResponse}},
 )
 def guidance(request: GuidanceRequest) -> GuidanceResponse:
-    fallback_reason: str | None = None
     try:
+        fallback_reason: str | None = None
         response = qwen_client.get_guidance(request.scene_description, request.geospatial_context)
         response.risk_score = compute_geospatial_risk(request.geospatial_context)
     except MissingAPIKeyError:
@@ -153,9 +153,9 @@ def edge_context(request: EdgeContextRequest) -> EdgeContextResponse:
 )
 async def analyze_image(
     image: UploadFile = File(...),
-    location_label: str | None = Form(default=None),
-    route_description: str | None = Form(default=None),
-    text_hint: str | None = Form(default=None),
+    location_label: str | None = Form(default=None, max_length=120),
+    route_description: str | None = Form(default=None, max_length=280),
+    text_hint: str | None = Form(default=None, max_length=200),
 ) -> ImageAnalysisResponse:
     geospatial_context = GeospatialContext(
         location_label=location_label,

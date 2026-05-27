@@ -4,6 +4,12 @@ from app.schemas import GeospatialContext, GuidanceResponse
 from app.services.geospatial import compute_geospatial_risk, risk_band
 
 
+# Safety-first neutral wording used when high-confidence inference is unavailable.
+DEFAULT_FALLBACK_GUIDANCE_TEXT = (
+    "Fallback guidance mode: pause, orient with your cane sweep, then move in short controlled "
+    "steps toward the clearest path while keeping one side as a tactile reference."
+)
+
 HAZARD_RULES = {
     "stairs": "There may be stairs nearby; use the handrail side if available and probe each step.",
     "traffic": "Traffic risk detected; pause and verify flow direction before crossing.",
@@ -38,11 +44,7 @@ def build_fallback_guidance(
     if geospatial_context and geospatial_context.route_description:
         route_note = f" Follow route context: {geospatial_context.route_description.strip()}."
 
-    guidance = (
-        "Fallback guidance mode: pause, orient with your cane sweep, then move in short controlled steps "
-        "toward the clearest path while keeping one side as a tactile reference."
-        f"{route_note}"
-    )
+    guidance = f"{DEFAULT_FALLBACK_GUIDANCE_TEXT}{route_note}"
 
     safety = " ".join(hazards) if hazards else "No specific hazard keyword detected; continue cautiously and verify each step physically."
     confidence = (

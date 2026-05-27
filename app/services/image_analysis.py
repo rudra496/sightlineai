@@ -1,13 +1,14 @@
 from __future__ import annotations
 
-import imghdr
 import re
+
+import filetype
 from fastapi import UploadFile
 
 from app.schemas import GeospatialContext, ImageAnalysisResponse
 from app.services.fallback_guidance import build_fallback_guidance
 
-ALLOWED_IMAGE_TYPES = {"jpeg", "png", "webp"}
+ALLOWED_IMAGE_TYPES = {"jpg", "jpeg", "png", "webp"}
 
 
 def _extract_filename_tokens(filename: str | None) -> str:
@@ -23,11 +24,20 @@ async def analyze_uploaded_image(
     text_hint: str | None,
     max_bytes: int,
 ) -> ImageAnalysisResponse:
-    content = await file.read(max_bytes + 1)
-    if len(content) > max_bytes:
-        raise ValueError(f"Image exceeds max size of {max_bytes} bytes")
+    content_parts: list[bytes] = []
+    total_bytes = 0
+    while True:
+        chunk = await file.read(1024 * 256)
+        if not chunk:
+            break
+        total_bytes += len(chunk)
+        if total_bytes > max_bytes:
+            raise ValueError(f"Image exceeds max size of {max_bytes} bytes")
+        content_parts.append(chunk)
 
-    image_kind = imghdr.what(None, h=content)
+    content = b"".join(content_parts)
+    guess = filetype.guess(content)
+    image_kind = guess.extension if guess else None
     if image_kind not in ALLOWED_IMAGE_TYPES:
         raise ValueError("Unsupported image type. Use PNG, JPEG, or WEBP")
 

@@ -207,7 +207,7 @@ textarea, input {
   font-size: 0.9rem;
 }
 
-kbd { border: 1px solid var(--border); border-radius: 4px; padding: 0.05rem 0.35rem; }
+kbd { border: 1px solid var(--border); border-radius: 4px; padding: 0.05rem 0.35rem; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
 
 @media (max-width: 900px) {
   .layout { grid-template-columns: 1fr; }
@@ -220,5 +220,8 @@ kbd { border: 1px solid var(--border); border-radius: 4px; padding: 0.05rem 0.35
 }
 
 @media (prefers-reduced-motion: reduce) {
-  * { scroll-behavior: auto !important; transition: none !important; }
+  html, body, .btn, .cta, .chip, input, textarea {
+    scroll-behavior: auto;
+    transition: none;
+  }
 }

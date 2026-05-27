@@ -3,6 +3,9 @@ from __future__ import annotations
 from app.schemas import EdgeContextRequest, EdgeContextResponse
 from app.services.geospatial import risk_band
 
+# Above this level, environmental audio cues become less reliable for navigation.
+NOISE_RISK_THRESHOLD_DB = 75
+
 
 def evaluate_edge_context(payload: EdgeContextRequest) -> EdgeContextResponse:
     score = 25
@@ -13,7 +16,7 @@ def evaluate_edge_context(payload: EdgeContextRequest) -> EdgeContextResponse:
         elif payload.obstacle_distance_m < 2.0:
             score += 25
 
-    if payload.ambient_noise_db is not None and payload.ambient_noise_db > 75:
+    if payload.ambient_noise_db is not None and payload.ambient_noise_db > NOISE_RISK_THRESHOLD_DB:
         score += 15
 
     if payload.motion_state in {"running", "vehicle"}:
@@ -30,7 +33,7 @@ def evaluate_edge_context(payload: EdgeContextRequest) -> EdgeContextResponse:
     actions = ["Keep cane sweep active and move in short steps."]
     if score >= 70:
         actions.append("Pause movement and re-evaluate obstacle distance before continuing.")
-    if payload.ambient_noise_db and payload.ambient_noise_db > 75:
+    if payload.ambient_noise_db and payload.ambient_noise_db > NOISE_RISK_THRESHOLD_DB:
         actions.append("Use vibration/haptic cues because audio cues may be masked by noise.")
 
     return EdgeContextResponse(

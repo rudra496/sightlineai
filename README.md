@@ -70,8 +70,8 @@ cp .env.example .env
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-- App UI: `http://localhost:8000`
-- Product site/docs page: `http://localhost:8000/frontend/` (interactive app), `index.html` for GitHub Pages
+- Interactive app UI: `http://localhost:8000`
+- GitHub Pages landing/docs: repository root `index.html` (served on GitHub Pages)
 
 ## API endpoints
 

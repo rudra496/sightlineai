@@ -9,7 +9,11 @@ class GeospatialContext(BaseModel):
     location_label: str | None = Field(default=None, max_length=120)
     route_description: str | None = Field(default=None, max_length=280)
     time_of_day: Literal["day", "night", "dawn", "dusk"] | None = None
-    known_hazards: list[str] = Field(default_factory=list, max_length=8)
+    known_hazards: list[str] = Field(
+        default_factory=list,
+        max_length=8,
+        description="Up to 8 known hazard tags to bias conservative risk scoring.",
+    )
     mobility_aid: str | None = Field(default=None, max_length=80)
 
 
