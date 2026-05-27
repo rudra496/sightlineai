@@ -171,3 +171,156 @@ class UpdateSettingsRequest(BaseModel):
     model: str | None = None
     timeout: float | None = Field(default=None, ge=5.0, le=120.0)
     persist_history: bool | None = None
+
+
+# --- OCR schemas ---
+
+class OCRRequest(BaseModel):
+    language: str = Field(default="eng", max_length=10, description="Tesseract language code")
+
+
+class OCRResponse(BaseModel):
+    text: str = Field(default="", description="Extracted text")
+    available: bool = Field(description="Whether OCR was available")
+    error: str | None = Field(default=None, description="Error message if OCR failed")
+
+
+# --- Map schemas ---
+
+class LocationSearchRequest(BaseModel):
+    query: str = Field(..., min_length=2, max_length=200)
+    limit: int = Field(default=5, ge=1, le=20)
+
+
+class LocationResult(BaseModel):
+    display_name: str
+    lat: float
+    lon: float
+    type: str = ""
+    address: dict = Field(default_factory=dict)
+
+
+class LocationSearchResponse(BaseModel):
+    results: list[LocationResult] = Field(default_factory=list)
+
+
+class RouteRequest(BaseModel):
+    origin_lat: float = Field(..., ge=-90, le=90)
+    origin_lon: float = Field(..., ge=-180, le=180)
+    dest_lat: float = Field(..., ge=-90, le=90)
+    dest_lon: float = Field(..., ge=-180, le=180)
+
+
+class RouteStep(BaseModel):
+    instruction: str = ""
+    name: str = ""
+    distance: float = 0
+    duration: float = 0
+    type: str = ""
+
+
+class RouteResponse(BaseModel):
+    available: bool
+    distance_m: float = 0
+    duration_s: float = 0
+    geometry: dict = Field(default_factory=dict)
+    steps: list[RouteStep] = Field(default_factory=list)
+    accessibility_notes: list[str] = Field(default_factory=list)
+    error: str | None = None
+
+
+class NearbyHazardsRequest(BaseModel):
+    lat: float = Field(..., ge=-90, le=90)
+    lon: float = Field(..., ge=-180, le=180)
+    radius: int = Field(default=200, ge=10, le=2000)
+
+
+class HazardItem(BaseModel):
+    type: str
+    lat: float | None = None
+    lon: float | None = None
+    tags: dict = Field(default_factory=dict)
+    name: str = ""
+
+
+class NearbyHazardsResponse(BaseModel):
+    available: bool
+    count: int = 0
+    hazards: list[HazardItem] = Field(default_factory=list)
+    error: str | None = None
+
+
+class AccessibilityTilesRequest(BaseModel):
+    lat: float = Field(..., ge=-90, le=90)
+    lon: float = Field(..., ge=-180, le=180)
+    radius: int = Field(default=300, ge=10, le=2000)
+
+
+class AccessibilityFeature(BaseModel):
+    type: str = "feature"
+    lat: float | None = None
+    lon: float | None = None
+    wheelchair: str | None = None
+    tactile_paving: str | None = None
+    name: str = ""
+    tags: dict = Field(default_factory=dict)
+
+
+class AccessibilityTilesResponse(BaseModel):
+    available: bool
+    count: int = 0
+    features: list[AccessibilityFeature] = Field(default_factory=list)
+    error: str | None = None
+
+
+# --- Sensor schemas ---
+
+class SensorReadingRequest(BaseModel):
+    sensor_type: str = Field(..., pattern=r"^(lidar|imu|depth|gps)$")
+    data: dict = Field(...)
+    timestamp: str | None = None
+
+
+class SensorReadingResponse(BaseModel):
+    processed: bool
+    sensor_type: str
+    result: dict = Field(default_factory=dict)
+    error: str | None = None
+
+
+class SensorFusionRequest(BaseModel):
+    readings: list[SensorReadingRequest] = Field(..., min_length=1)
+
+
+class SensorFusionResponse(BaseModel):
+    risk_score: int = Field(ge=0, le=100)
+    risk_level: str
+    sensor_count: int = 0
+    sensor_types: list[str] = Field(default_factory=list)
+    factors: list[str] = Field(default_factory=list)
+    guidance: dict = Field(default_factory=dict)
+
+
+# --- Auth schemas ---
+
+class UserRegister(BaseModel):
+    email: str = Field(..., min_length=3, max_length=200)
+    password: str = Field(..., min_length=6, max_length=128)
+    name: str = Field(..., min_length=1, max_length=100)
+
+
+class UserLogin(BaseModel):
+    email: str = Field(..., min_length=3, max_length=200)
+    password: str = Field(..., min_length=1, max_length=128)
+
+
+class UserResponse(BaseModel):
+    id: str
+    email: str
+    name: str
+
+
+class TokenResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    user: UserResponse

@@ -11,43 +11,12 @@ from app.config import get_settings
 from app.qwen_client import MissingAPIKeyError, QwenClient, QwenClientError, UpstreamAPIError
 from app.schemas import GeospatialContext, ImageAnalysisResponse
 from app.services.fallback_guidance import build_fallback_guidance
+from app.services.ocr_service import extract_text as _attempt_ocr, is_ocr_available as _check_ocr_available
 from app.prompts import FALLBACK_TEMPLATES_BN
 
 logger = logging.getLogger("sightlineai.image_analysis")
 
 ALLOWED_IMAGE_TYPES = {"jpg", "jpeg", "png", "webp"}
-
-# --- OCR Stub ---
-_OCR_AVAILABLE: bool | None = None
-
-
-def _check_ocr_available() -> bool:
-    """Check if pytesseract is available at runtime."""
-    global _OCR_AVAILABLE
-    if _OCR_AVAILABLE is not None:
-        return _OCR_AVAILABLE
-    try:
-        import pytesseract  # noqa: F401
-        _OCR_AVAILABLE = True
-    except ImportError:
-        _OCR_AVAILABLE = False
-    return _OCR_AVAILABLE
-
-
-def _attempt_ocr(content: bytes) -> str | None:
-    """Attempt basic OCR text extraction. Returns None if OCR unavailable."""
-    if not _check_ocr_available():
-        return None
-    try:
-        import pytesseract
-        from PIL import Image
-        import io
-
-        img = Image.open(io.BytesIO(content))
-        text = pytesseract.image_to_string(img).strip()
-        return text if text else None
-    except Exception:
-        return None
 
 
 # --- Brightness Estimation (pure Python, no PIL) ---

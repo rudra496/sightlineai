@@ -14,7 +14,7 @@ from pathlib import Path
 from uuid import uuid4
 
 from fastapi import (
-    FastAPI, File, Form, HTTPException, Request, UploadFile,
+    Depends, FastAPI, File, Form, HTTPException, Request, UploadFile,
     WebSocket, WebSocketDisconnect,
 )
 from fastapi.exceptions import RequestValidationError
@@ -28,6 +28,8 @@ from app.qwen_client import MissingAPIKeyError, QwenClient, QwenClientError, Ups
 from app.schemas import (
     AccessibilityScoreRequest,
     AccessibilityScoreResponse,
+    AccessibilityTilesRequest,
+    AccessibilityTilesResponse,
     AppSettings,
     ConversationRequest,
     ConversationResponse,
@@ -41,18 +43,37 @@ from app.schemas import (
     GuidanceResponse,
     HistorySearchRequest,
     ImageAnalysisResponse,
+    LocationSearchRequest,
+    LocationSearchResponse,
+    NearbyHazardsRequest,
+    NearbyHazardsResponse,
+    OCRResponse,
     OfflineStatusResponse,
     PinRequest,
+    RouteRequest,
+    RouteResponse,
+    SensorFusionRequest,
+    SensorFusionResponse,
+    SensorReadingRequest,
+    SensorReadingResponse,
     SessionHistoryCreateRequest,
     SessionHistoryItem,
     SessionHistoryResponse,
+    TokenResponse,
     UpdateSettingsRequest,
+    UserLogin,
+    UserRegister,
+    UserResponse,
 )
 from app.services.edge_context import evaluate_edge_context
 from app.services.fallback_guidance import build_fallback_guidance
 from app.services.geospatial import compute_geospatial_risk
 from app.services.history_store import SessionHistoryStore
 from app.services.image_analysis import analyze_uploaded_image
+from app.services.ocr_service import is_ocr_available as _is_ocr_available, extract_text_with_metadata
+from app.services.map_service import search_location as _search_location, get_route as _get_route, get_nearby_hazards as _get_nearby_hazards, get_accessibility_tiles as _get_accessibility_tiles
+from app.services.sensor_service import SensorAdapter, compute_sensor_fusion, generate_sensor_guidance
+from app.services.auth_service import create_token, verify_token, invalidate_token, register_user as _register_user, authenticate_user as _authenticate_user, get_user as _get_user
 
 # ---------------------------------------------------------------------------
 # Structured logging
@@ -230,6 +251,7 @@ def health() -> dict:
         "fallback_enabled": True,
         "circuit_breaker_open": qwen_client.circuit_open,
         "timestamp": datetime.now(timezone.utc).isoformat(),
+        "ocr_available": _is_ocr_available(),
     }
 
 
@@ -698,6 +720,238 @@ async def ws_guidance(websocket: WebSocket) -> None:
             await websocket.send_json({"type": "error", "message": str(e)})
         except Exception:
             pass
+
+
+
+# ---------------------------------------------------------------------------
+# Auth dependency
+# ---------------------------------------------------------------------------
+
+_sensor_adapter = SensorAdapter()
+
+
+def get_current_user(request: Request) -> dict | None:
+    """Extract and verify Bearer token from Authorization header."""
+    auth_header = request.headers.get("Authorization", "")
+    if not auth_header.startswith("Bearer "):
+        return None
+    token = auth_header[7:]
+    payload = verify_token(token)
+    if not payload:
+        return None
+    user_id = payload.get("sub")
+    if not user_id:
+        return None
+    user = _get_user(user_id)
+    return user
+
+
+# ---------------------------------------------------------------------------
+# OCR endpoint
+# ---------------------------------------------------------------------------
+
+@app.post("/api/ocr", response_model=OCRResponse)
+async def ocr_extract(image: UploadFile = File(...)) -> OCRResponse:
+    """Extract text from an uploaded image using OCR."""
+    content_parts: list[bytes] = []
+    while True:
+        chunk = await image.read(1024 * 256)
+        if not chunk:
+            break
+        content_parts.append(chunk)
+    content = b"".join(content_parts)
+
+    result = extract_text_with_metadata(content)
+    if not result.get("available"):
+        return OCRResponse(text="", available=False, error=result.get("error", "pytesseract not installed"))
+    if result.get("error"):
+        return OCRResponse(text="", available=True, error=result["error"])
+    return OCRResponse(text=result.get("text", ""), available=True)
+
+
+# ---------------------------------------------------------------------------
+# Map endpoints
+# ---------------------------------------------------------------------------
+
+@app.post("/api/map/search", response_model=LocationSearchResponse)
+def map_search(request: LocationSearchRequest) -> LocationSearchResponse:
+    """Search for locations using Nominatim geocoding."""
+    from app.schemas import LocationResult
+    results = _search_location(request.query, request.limit)
+    return LocationSearchResponse(
+        results=[LocationResult(**r) for r in results]
+    )
+
+
+@app.post("/api/map/route", response_model=RouteResponse)
+def map_route(request: RouteRequest) -> RouteResponse:
+    """Get a walking route with accessibility notes via OSRM."""
+    from app.schemas import RouteStep
+    result = _get_route(
+        origin=(request.origin_lat, request.origin_lon),
+        destination=(request.dest_lat, request.dest_lon),
+    )
+    if not result.get("available"):
+        return RouteResponse(available=False, error=result.get("error", "Route not found"))
+    steps = [RouteStep(**s) for s in result.get("steps", [])]
+    return RouteResponse(
+        available=True,
+        distance_m=result.get("distance_m", 0),
+        duration_s=result.get("duration_s", 0),
+        geometry=result.get("geometry", {}),
+        steps=steps,
+        accessibility_notes=result.get("accessibility_notes", []),
+    )
+
+
+@app.post("/api/map/nearby-hazards", response_model=NearbyHazardsResponse)
+def map_nearby_hazards(request: NearbyHazardsRequest) -> NearbyHazardsResponse:
+    """Get nearby accessibility hazards from OpenStreetMap."""
+    from app.schemas import HazardItem
+    result = _get_nearby_hazards(request.lat, request.lon, request.radius)
+    hazards = [HazardItem(**h) for h in result.get("hazards", [])]
+    return NearbyHazardsResponse(
+        available=result.get("available", False),
+        count=result.get("count", 0),
+        hazards=hazards,
+        error=result.get("error"),
+    )
+
+
+@app.post("/api/map/accessibility-tiles", response_model=AccessibilityTilesResponse)
+def map_accessibility_tiles(request: AccessibilityTilesRequest) -> AccessibilityTilesResponse:
+    """Get OSM accessibility features nearby."""
+    from app.schemas import AccessibilityFeature
+    result = _get_accessibility_tiles(request.lat, request.lon, request.radius)
+    features = [AccessibilityFeature(**f) for f in result.get("features", [])]
+    return AccessibilityTilesResponse(
+        available=result.get("available", False),
+        count=result.get("count", 0),
+        features=features,
+        error=result.get("error"),
+    )
+
+
+# ---------------------------------------------------------------------------
+# Sensor endpoints
+# ---------------------------------------------------------------------------
+
+@app.post("/api/sensor/reading", response_model=SensorReadingResponse)
+def sensor_reading(request: SensorReadingRequest) -> SensorReadingResponse:
+    """Submit a sensor reading for processing."""
+    processor_map = {
+        "lidar": _sensor_adapter.process_lidar,
+        "imu": _sensor_adapter.process_imu,
+        "depth": _sensor_adapter.process_depth,
+        "gps": _sensor_adapter.process_gps,
+    }
+    processor = processor_map.get(request.sensor_type)
+    if not processor:
+        return SensorReadingResponse(processed=False, sensor_type=request.sensor_type, error=f"Unknown sensor type: {request.sensor_type}")
+    result = processor(request.data)
+    if not result.get("processed"):
+        return SensorReadingResponse(processed=False, sensor_type=request.sensor_type, error=result.get("error", "Processing failed"))
+    return SensorReadingResponse(processed=True, sensor_type=request.sensor_type, result=result)
+
+
+@app.post("/api/sensor/fusion", response_model=SensorFusionResponse)
+def sensor_fusion(request: SensorFusionRequest) -> SensorFusionResponse:
+    """Submit multiple sensor readings for fusion analysis."""
+    processed_readings = []
+    for r in request.readings:
+        processor_map = {
+            "lidar": _sensor_adapter.process_lidar,
+            "imu": _sensor_adapter.process_imu,
+            "depth": _sensor_adapter.process_depth,
+            "gps": _sensor_adapter.process_gps,
+        }
+        processor = processor_map.get(r.sensor_type)
+        if processor:
+            result = processor(r.data)
+            if result.get("processed"):
+                processed_readings.append(result)
+
+    fusion = compute_sensor_fusion(processed_readings)
+    guidance = generate_sensor_guidance(fusion)
+
+    return SensorFusionResponse(
+        risk_score=fusion["risk_score"],
+        risk_level=fusion["risk_level"],
+        sensor_count=fusion["sensor_count"],
+        sensor_types=fusion["sensor_types"],
+        factors=fusion["factors"],
+        guidance=guidance,
+    )
+
+
+@app.post("/api/sensor/guidance")
+def sensor_guidance(request: SensorFusionRequest) -> dict:
+    """Get guidance directly from sensor data."""
+    processed_readings = []
+    for r in request.readings:
+        processor_map = {
+            "lidar": _sensor_adapter.process_lidar,
+            "imu": _sensor_adapter.process_imu,
+            "depth": _sensor_adapter.process_depth,
+            "gps": _sensor_adapter.process_gps,
+        }
+        processor = processor_map.get(r.sensor_type)
+        if processor:
+            result = processor(r.data)
+            if result.get("processed"):
+                processed_readings.append(result)
+
+    fusion = compute_sensor_fusion(processed_readings)
+    return generate_sensor_guidance(fusion)
+
+
+# ---------------------------------------------------------------------------
+# Auth endpoints
+# ---------------------------------------------------------------------------
+
+@app.post("/api/auth/register", response_model=TokenResponse)
+def auth_register(request: UserRegister) -> TokenResponse:
+    """Register a new user."""
+    try:
+        user = _register_user(email=request.email, password=request.password, name=request.name)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail={"error": "registration_failed", "detail": str(exc)}) from exc
+    token = create_token(user["id"])
+    return TokenResponse(
+        access_token=token,
+        user=UserResponse(id=user["id"], email=user["email"], name=user["name"]),
+    )
+
+
+@app.post("/api/auth/login", response_model=TokenResponse)
+def auth_login(request: UserLogin) -> TokenResponse:
+    """Login and receive a JWT token."""
+    user = _authenticate_user(email=request.email, password=request.password)
+    if not user:
+        raise HTTPException(status_code=401, detail={"error": "invalid_credentials", "detail": "Invalid email or password"})
+    token = create_token(user["id"])
+    return TokenResponse(
+        access_token=token,
+        user=UserResponse(id=user["id"], email=user["email"], name=user["name"]),
+    )
+
+
+@app.get("/api/auth/me", response_model=UserResponse)
+def auth_me(request: Request) -> UserResponse:
+    """Get current user profile (requires auth)."""
+    user = get_current_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail={"error": "unauthorized", "detail": "Valid Bearer token required"})
+    return UserResponse(id=user["id"], email=user["email"], name=user["name"])
+
+
+@app.post("/api/auth/logout")
+def auth_logout(request: Request) -> dict[str, bool]:
+    """Invalidate the current token."""
+    auth_header = request.headers.get("Authorization", "")
+    if auth_header.startswith("Bearer "):
+        invalidate_token(auth_header[7:])
+    return {"logged_out": True}
 
 
 # ---------------------------------------------------------------------------
