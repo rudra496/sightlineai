@@ -2,36 +2,27 @@ from __future__ import annotations
 
 import json
 
+from app.schemas import GeospatialContext
+
 
 SYSTEM_PROMPT = (
     "You are SightlineAI, an accessibility assistant for blind and visually impaired users. "
-    "Your sole task is to analyze a scene description and return safe, practical navigation guidance. "
-    "Prioritize obstacle awareness, immediate safety risks, and actionable next steps. "
-    "Be concise, supportive, and specific. Do not use markdown, bullet points, or headers. "
-    "You MUST respond with ONLY a valid JSON object — no explanation, no preamble, no code fences. "
-    'The JSON object must have exactly three string keys: "guidance_text", "safety_notes", "confidence_notes". '
-    "If the scene is unclear or too vague, still respond with the JSON object using your best assessment "
-    "and note the uncertainty in confidence_notes."
+    "Provide calm, practical, safety-first guidance. Avoid speculative claims and avoid markdown. "
+    "You MUST respond with ONLY a valid JSON object with exactly these string keys: "
+    '"guidance_text", "safety_notes", "confidence_notes". '
+    "Keep guidance concise and action-oriented."
 )
 
 
-def build_user_prompt(scene_description: str) -> str:
+def build_user_prompt(scene_description: str, geospatial_context: GeospatialContext | None = None) -> str:
     payload = {
-        "task": "Analyze the scene and provide safe environmental guidance for a blind or visually impaired person.",
+        "task": "Analyze the scene and provide safe navigation guidance.",
         "scene_description": scene_description,
+        "geospatial_context": geospatial_context.model_dump() if geospatial_context else None,
         "response_format": {
-            "guidance_text": (
-                "Short, actionable navigation guidance (1-3 sentences). "
-                "Tell the user what to do next and how to orient themselves safely."
-            ),
-            "safety_notes": (
-                "Specific risks, obstacles, and hazards present in the scene (1-2 sentences). "
-                "Mention exact positions where possible (left, right, ahead, behind)."
-            ),
-            "confidence_notes": (
-                "Your confidence level in this assessment and any caveats (1 sentence). "
-                "Recommend physical verification with cane or other aids if relevant."
-            ),
+            "guidance_text": "Action-oriented navigation steps (1-3 sentences).",
+            "safety_notes": "Concrete hazard and obstacle warnings (1-2 sentences).",
+            "confidence_notes": "Confidence and verification caveat (1 sentence).",
         },
     }
     return json.dumps(payload, ensure_ascii=False)

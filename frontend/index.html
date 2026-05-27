@@ -3,91 +3,100 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="SightlineAI — Qwen-powered environmental guidance for blind and visually impaired users." />
-    <title>SightlineAI | Accessibility Guidance</title>
+    <meta name="description" content="SightlineAI is an accessibility-first assistant with Qwen reasoning, offline fallback, voice, image, memory, and geospatial context." />
+    <title>SightlineAI | Accessibility Guidance Console</title>
     <link rel="stylesheet" href="/frontend/style.css" />
   </head>
   <body>
     <a href="#scene" class="skip-link">Skip to scene input</a>
 
-    <main class="container" aria-labelledby="app-title">
-      <header class="site-header">
-        <div class="logo-row">
-          <span class="logo-icon" aria-hidden="true">👁</span>
-          <h1 id="app-title">SightlineAI</h1>
-        </div>
-        <p class="subtitle">Qwen-powered environmental guidance for blind and visually impaired users.</p>
-        <p class="hint-text">Describe a scene in plain language and receive structured safety guidance.</p>
-      </header>
-
-      <!-- Example prompts -->
-      <section class="examples-row" aria-label="Example scene descriptions">
-        <span class="examples-label">Try an example:</span>
-        <button type="button" class="example-chip" data-example="I am at a busy intersection with parked scooters on my left and roadwork barriers ahead.">Intersection</button>
-        <button type="button" class="example-chip" data-example="I am inside a grocery store near the entrance. Shopping carts are scattered on my right and a wet-floor sign is directly ahead.">Grocery store</button>
-        <button type="button" class="example-chip" data-example="I am on a narrow sidewalk beside a construction site. Scaffolding is on my right and traffic is close on my left.">Construction site</button>
-        <button type="button" class="example-chip" data-example="I am at the top of an outdoor staircase at a train station. The stairs slope steeply downward with a railing only on the right side.">Train station stairs</button>
-      </section>
-
-      <!-- Input card -->
-      <section class="card" aria-label="Scene input">
-        <div class="label-row">
-          <label for="scene">Describe your scene</label>
-          <span id="charCount" class="char-count" aria-live="off"></span>
-        </div>
-        <textarea
-          id="scene"
-          name="scene"
-          rows="6"
-          maxlength="2000"
-          placeholder="Example: I am at a busy intersection with parked scooters on my left and roadwork barriers ahead."
-          aria-describedby="charCount sceneHint"
-          required
-        ></textarea>
-        <p id="sceneHint" class="field-hint">Press <kbd>Ctrl</kbd>+<kbd>Enter</kbd> (or <kbd>⌘</kbd>+<kbd>Enter</kbd>) to analyze.</p>
-
-        <div class="actions">
-          <button id="analyzeBtn" type="button" aria-describedby="status">
-            <span class="btn-icon" aria-hidden="true">🔍</span>
-            Analyze Scene
-          </button>
-          <button id="speakBtn" type="button" class="secondary" disabled aria-label="Speak guidance aloud">
-            <span class="btn-icon" aria-hidden="true">🔊</span>
-            Speak Guidance
-          </button>
-          <button id="copyBtn" type="button" class="secondary" disabled aria-label="Copy all guidance to clipboard">
-            <span class="btn-icon" aria-hidden="true">📋</span>
-            Copy
-          </button>
-        </div>
-
-        <div id="status" role="status" aria-live="polite" aria-atomic="true" class="status-bar"></div>
-      </section>
-
-      <!-- Loading skeleton -->
-      <div id="loadingSkeleton" class="skeleton-wrapper" aria-hidden="true" hidden>
-        <div class="skeleton-card">
-          <div class="skeleton-line wide"></div>
-          <div class="skeleton-line medium"></div>
-          <div class="skeleton-line narrow"></div>
-        </div>
+    <header class="hero" aria-labelledby="app-title">
+      <p class="eyebrow">Accessibility-first AI guidance</p>
+      <h1 id="app-title">SightlineAI</h1>
+      <p class="hero-copy">Describe a scene, upload an image, or speak naturally to get structured safety guidance with resilient fallback behavior.</p>
+      <div class="hero-cta">
+        <a class="cta" href="#workspace">Start guidance</a>
+        <a class="cta ghost" href="/docs/architecture.md">View architecture</a>
       </div>
+    </header>
 
-      <!-- Output card -->
-      <section class="card output-card" aria-label="Guidance output" id="outputSection">
-        <div class="output-header">
-          <h2>Guidance</h2>
-        </div>
-        <div id="output" aria-live="polite" aria-atomic="true" class="output-grid">
-          <div class="output-block empty-state">
-            <p>Enter a scene description above and click <strong>Analyze Scene</strong> to receive accessibility guidance.</p>
+    <main id="workspace" class="layout" aria-label="SightlineAI workspace">
+      <section class="card" aria-label="Guidance inputs">
+        <h2>Scene input</h2>
+        <p class="helper">Use text, voice, and optional route context. Keyboard shortcut: <kbd>Ctrl</kbd>/<kbd>⌘</kbd> + <kbd>Enter</kbd>.</p>
+
+        <div class="grid-2">
+          <div>
+            <label for="scene">Scene description</label>
+            <textarea id="scene" rows="6" maxlength="2000" aria-describedby="charCount status" placeholder="Example: I am near an intersection with scooters on my left and a barrier ahead."></textarea>
+            <div class="meta-row">
+              <span id="charCount" class="muted">0 / 2000</span>
+              <button id="voiceBtn" type="button" class="btn ghost" aria-pressed="false" aria-label="Toggle voice input">🎙️ Voice input</button>
+            </div>
+          </div>
+          <div>
+            <label for="locationLabel">Location (optional)</label>
+            <input id="locationLabel" type="text" maxlength="120" placeholder="Downtown crosswalk" />
+            <label for="routeDescription">Route notes (optional)</label>
+            <input id="routeDescription" type="text" maxlength="280" placeholder="Heading north, temporary construction cones" />
+            <label for="knownHazards">Known hazards (comma-separated)</label>
+            <input id="knownHazards" type="text" maxlength="200" placeholder="construction, stairs" />
           </div>
         </div>
+
+        <div class="chip-row" aria-label="Example prompts">
+          <button type="button" class="chip" data-example="I am in front of a bus stop with moving traffic on the left and a post ahead.">Bus stop</button>
+          <button type="button" class="chip" data-example="I am inside a grocery aisle and hear carts approaching from behind.">Grocery aisle</button>
+          <button type="button" class="chip" data-example="I am at the top of stairs in a train station and only feel a handrail on the right.">Station stairs</button>
+        </div>
+
+        <div class="actions">
+          <button id="analyzeBtn" type="button" class="btn">Analyze scene</button>
+          <button id="fallbackBtn" type="button" class="btn ghost">Force offline fallback</button>
+          <button id="speakBtn" type="button" class="btn ghost" disabled>Speak guidance</button>
+          <button id="copyBtn" type="button" class="btn ghost" disabled>Copy response</button>
+          <button id="pinBtn" type="button" class="btn ghost" disabled>Pin to memory</button>
+        </div>
+
+        <div id="status" role="status" aria-live="polite" class="status"></div>
       </section>
+
+      <section class="card" aria-label="Image analysis">
+        <h2>Image input</h2>
+        <p class="helper">Upload JPG/PNG/WEBP up to 5 MB. Add a hint for better fallback guidance.</p>
+        <label for="imageInput">Image file</label>
+        <input id="imageInput" type="file" accept="image/png,image/jpeg,image/webp" />
+        <label for="imageHint">Image hint (optional)</label>
+        <input id="imageHint" type="text" maxlength="200" placeholder="Crosswalk with parked scooters" />
+        <div class="actions">
+          <button id="imageAnalyzeBtn" type="button" class="btn">Analyze image</button>
+        </div>
+      </section>
+
+      <section class="card" aria-label="Guidance response">
+        <div class="heading-row">
+          <h2>Guidance response</h2>
+          <span id="modeBadge" class="badge">No response</span>
+        </div>
+        <div id="responseGrid" class="response-grid">
+          <article class="response-card empty">
+            <p>Run scene or image analysis to see guidance, safety notes, and confidence details.</p>
+          </article>
+        </div>
+      </section>
+
+      <aside class="card" aria-label="Session memory">
+        <div class="heading-row">
+          <h2>Session memory</h2>
+          <button id="clearHistoryBtn" class="btn ghost" type="button">Clear</button>
+        </div>
+        <p class="helper">Local memory is stored in your browser for quick revisit and pinning.</p>
+        <ul id="historyList" class="history-list" aria-live="polite"></ul>
+      </aside>
     </main>
 
-    <footer class="site-footer" role="contentinfo">
-      <p>SightlineAI — Powered by <a href="https://dashscope.console.aliyun.com/" target="_blank" rel="noopener noreferrer">Qwen via DashScope</a></p>
+    <footer class="footer">
+      <p>SightlineAI · Qwen-compatible + deterministic fallback · Built for accessible, low-connectivity guidance.</p>
     </footer>
 
     <script src="/frontend/app.js"></script>

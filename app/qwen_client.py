@@ -6,7 +6,7 @@ from requests.exceptions import RequestException, Timeout
 
 from app.config import Settings
 from app.prompts import SYSTEM_PROMPT, build_user_prompt
-from app.schemas import GuidanceResponse
+from app.schemas import GeospatialContext, GuidanceResponse
 from app.utils import extract_json_object, normalize_guidance_payload
 
 
@@ -30,7 +30,7 @@ class QwenClient:
     def has_api_key(self) -> bool:
         return bool(self._settings.dashscope_api_key)
 
-    def get_guidance(self, scene_description: str) -> GuidanceResponse:
+    def get_guidance(self, scene_description: str, geospatial_context: GeospatialContext | None = None) -> GuidanceResponse:
         if not self._settings.dashscope_api_key:
             raise MissingAPIKeyError(
                 "Missing DASHSCOPE_API_KEY. Set it in your environment before running the API."
@@ -41,7 +41,13 @@ class QwenClient:
             "model": self._settings.qwen_model,
             "messages": [
                 {"role": "system", "content": SYSTEM_PROMPT},
-                {"role": "user", "content": build_user_prompt(scene_description)},
+                {
+                    "role": "user",
+                    "content": build_user_prompt(
+                        scene_description=scene_description,
+                        geospatial_context=geospatial_context,
+                    ),
+                },
             ],
             "temperature": 0.2,
             "max_tokens": 320,

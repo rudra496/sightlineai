@@ -13,7 +13,6 @@ from app.config import get_settings
 from app.qwen_client import MissingAPIKeyError, QwenClient, UpstreamAPIError
 
 
-
 def run_smoke(scene: str, allow_live_call: bool) -> int:
     settings = get_settings()
     client = QwenClient(settings)
@@ -21,9 +20,10 @@ def run_smoke(scene: str, allow_live_call: bool) -> int:
     print("[smoke] Config loaded")
     print(f"[smoke] Base URL: {settings.dashscope_base_url}")
     print(f"[smoke] Model: {settings.qwen_model}")
+    print(f"[smoke] Max image bytes: {settings.image_max_bytes}")
 
     if not client.has_api_key:
-        print("[smoke] DASHSCOPE_API_KEY not set. Skipping live API call.")
+        print("[smoke] DASHSCOPE_API_KEY not set. Live Qwen call skipped; fallback mode remains available.")
         return 0
 
     if not allow_live_call:
