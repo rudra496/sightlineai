@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SightlineAI | Accessibility Guidance</title>
+    <link rel="stylesheet" href="/frontend/style.css" />
+  </head>
+  <body>
+    <main class="container" aria-labelledby="app-title">
+      <header>
+        <h1 id="app-title">SightlineAI</h1>
+        <p class="subtitle">Qwen-powered environmental guidance for blind and visually impaired users.</p>
+      </header>
+
+      <section class="card" aria-label="Scene input">
+        <label for="scene">Describe your scene</label>
+        <textarea
+          id="scene"
+          name="scene"
+          rows="6"
+          placeholder="Example: I am at a busy intersection with parked scooters on my left and roadwork barriers ahead."
+          required
+        ></textarea>
+
+        <div class="actions">
+          <button id="analyzeBtn" type="button">Analyze Scene</button>
+          <button id="speakBtn" type="button" class="secondary" disabled>Speak Guidance</button>
+        </div>
+
+        <p id="status" role="status" aria-live="polite"></p>
+      </section>
+
+      <section class="card" aria-label="Guidance output">
+        <h2>Guidance</h2>
+        <div class="output" id="output" aria-live="polite">
+          <p><strong>Guidance text:</strong> Waiting for input.</p>
+          <p><strong>Safety notes:</strong> --</p>
+          <p><strong>Confidence notes:</strong> --</p>
+        </div>
+      </section>
+    </main>
+
+    <script src="/frontend/app.js"></script>
+  </body>
+</html>
