@@ -2,318 +2,106 @@
 
 <div align="center">AI-Powered Accessibility Guidance Platform for the Visually Impaired
 
-Real-time scene understanding, OCR, navigation assistance, and multimodal accessibility guidance powered by Gemini & Qwen AI.
+Empowering independent navigation through multimodal artificial intelligence.
 
-🌐 Live Demo: https://rudra496.github.io/sightlineai
+"🌐 Live Demo" (https://rudra496.github.io/sightlineai) •
+"📖 Documentation" (https://github.com/rudra496/sightlineai) •
+"🐛 Report Issue" (https://github.com/rudra496/sightlineai/issues) •
+"💡 Feature Request" (https://github.com/rudra496/sightlineai/issues)
 
 "License" (https://img.shields.io/badge/License-MIT-green.svg)
 "Python" (https://img.shields.io/badge/Python-3.11+-blue.svg)
 "FastAPI" (https://img.shields.io/badge/FastAPI-Modern_API-009688.svg)
 "Open Source" (https://img.shields.io/badge/Open%20Source-Yes-success.svg)
-"Accessibility" (https://img.shields.io/badge/Accessibility-First-orange.svg)
+"AI" (https://img.shields.io/badge/AI-Gemini%20%7C%20Qwen-purple.svg)
 
 </div>---
 
-🌟 Vision
+🌟 Overview
 
-Making the world more accessible for everyone, one step at a time.
+SightlineAI is an open-source accessibility platform designed to help blind and visually impaired individuals better understand, navigate, and interact with their surroundings.
 
-More than 285 million people worldwide live with visual impairment. Many assistive technologies remain expensive, inaccessible, and unavailable in developing countries.
-
-SightlineAI aims to provide an affordable, AI-powered accessibility platform capable of understanding surroundings, reading text, identifying hazards, and assisting independent navigation.
+By combining computer vision, OCR, conversational AI, and navigation intelligence, SightlineAI transforms ordinary devices into intelligent accessibility companions capable of delivering real-time environmental awareness and guidance.
 
 ---
 
-🚀 What is SightlineAI?
+🚀 Key Features
 
-SightlineAI is an AI-powered accessibility platform designed to help visually impaired individuals better understand and interact with their environment.
-
-The platform combines:
-
-- Computer Vision
-- OCR (Optical Character Recognition)
-- Conversational AI
-- Navigation Assistance
-- Accessibility Scoring
-- Context-Aware Guidance
-- Multilingual Support
-
-to provide real-time assistance through voice and text.
+- 👁️ Real-time scene understanding
+- 📄 OCR and document reading assistance
+- ⚠️ Obstacle and hazard awareness
+- 🗺️ Context-aware navigation support
+- 💬 Conversational AI assistance
+- 🌐 Multi-language accessibility support
+- 🔄 Offline fallback capabilities
+- ⚡ Real-time WebSocket communication
 
 ---
 
-✨ Key Features
+🧠 AI Architecture
 
-👁️ Scene Understanding
+SightlineAI follows a multi-model architecture that supports multiple AI providers.
 
-Analyze surroundings and generate contextual descriptions.
+Supported Models
 
-📄 OCR & Reading Assistance
+Provider| Capability
+Google Gemini| Multimodal reasoning, scene understanding, accessibility guidance
+Qwen| Vision analysis, conversational intelligence, contextual assistance
 
-Read:
-
-- Documents
-- Signboards
-- Product Labels
-- Printed Text
-- Public Information
-
-⚠️ Hazard Detection
-
-Identify:
-
-- Obstacles
-- Unsafe Areas
-- Accessibility Risks
-- Environmental Hazards
-
-🗺️ Navigation Assistance
-
-Provide:
-
-- Route Guidance
-- Nearby POIs
-- Accessibility Context
-- Location Awareness
-
-💬 Conversational Assistance
-
-Natural language interaction with conversation memory.
-
-🌐 Multilingual Support
-
-Supported Languages:
-
-- English
-- Bangla
-- Arabic
-- Spanish
-
-🔄 Offline Fallback
-
-Basic accessibility assistance remains available even when connectivity is limited.
+This provider-agnostic design improves flexibility, reliability, and future scalability.
 
 ---
 
-🧠 Multi-Model AI Architecture
+🏗️ System Workflow
 
-SightlineAI follows a provider-agnostic architecture and supports multiple AI models.
-
-Supported AI Providers
-
-Google Gemini
-
-- Gemini 2.5 Flash
-- Gemini Vision
-- Multimodal Reasoning
-- Context-Aware Guidance
-
-Qwen
-
-- Qwen 3.x Models
-- Multimodal Scene Understanding
-- Conversational Assistance
-
-Benefits
-
-- Higher reliability
-- Reduced vendor lock-in
-- Better deployment flexibility
-- Future model compatibility
+Camera / Voice Input
+          ↓
+Visual & Context Processing
+          ↓
+Gemini / Qwen AI Analysis
+          ↓
+Risk & Accessibility Assessment
+          ↓
+Voice and Text Guidance
 
 ---
 
-🏗️ System Architecture
+🌍 Impact
 
-User Input
-↓
-Camera / Voice / Sensors
-↓
-Frontend Interface
-↓
-FastAPI Backend
-↓
-AI Processing Layer
-├── Gemini
-├── Qwen
-├── OCR Engine
-├── Vision Processing
-└── Sensor Fusion
-↓
-Risk Assessment
-↓
-Accessibility Guidance
-↓
-Voice & Text Response
+SightlineAI addresses accessibility challenges faced by more than 285 million visually impaired people worldwide, particularly in regions where advanced assistive technologies remain financially inaccessible.
+
+United Nations SDGs
+
+- 💚 SDG 3 – Good Health & Well-Being
+- ❤️ SDG 10 – Reduced Inequalities
+- 💛 SDG 11 – Sustainable Cities & Communities
 
 ---
 
 🛠️ Technology Stack
 
-Backend
-
-- Python 3.11+
-- FastAPI
-- WebSockets
-- JWT Authentication
-
-AI & Machine Learning
-
-- Google Gemini
-- Qwen
-- OCR Processing
-- Computer Vision
-
-Frontend
-
-- React
-- HTML5
-- CSS3
-- JavaScript
-
-Infrastructure
-
-- Docker
-- SQLite
-- PostgreSQL
-- Redis
-
-Maps & Navigation
-
-- OpenStreetMap
-- Geolocation Services
+Category| Technologies
+Backend| Python, FastAPI
+Frontend| React, HTML, CSS, JavaScript
+AI Models| Google Gemini, Qwen
+Vision| OCR, Computer Vision
+Infrastructure| Docker, Redis
+Database| SQLite, PostgreSQL
+Navigation| OpenStreetMap
 
 ---
 
-🔐 Environment Variables
-
-Required:
-
-AI_PROVIDER=auto
-
-GEMINI_API_KEY=
-GEMINI_MODEL=gemini-2.5-flash
-
-DASHSCOPE_API_KEY=
-QWEN_MODEL=qwen3.7-max
-
----
-
-⚡ Quick Start
-
-Clone Repository
+⚙️ Quick Start
 
 git clone https://github.com/rudra496/sightlineai.git
+
 cd sightlineai
-
-Create Environment
-
-python -m venv venv
-
-Install Dependencies
-
-pip install -r requirements.txt
-
-Configure Environment
 
 cp .env.example .env
 
-Run Application
+pip install -r requirements.txt
 
 python -m app.main
-
----
-
-🌍 Accessibility Impact
-
-SightlineAI aligns with several United Nations Sustainable Development Goals.
-
-SDG 3
-
-Good Health and Well-being
-
-SDG 10
-
-Reduced Inequalities
-
-SDG 11
-
-Sustainable Cities and Communities
-
----
-
-🎯 Target Beneficiaries
-
-- Blind Individuals
-- Low-Vision Users
-- Rehabilitation Centers
-- Accessibility NGOs
-- Hospitals
-- Educational Institutions
-
----
-
-📈 Potential Applications
-
-Education
-
-Reading assistance and learning support.
-
-Healthcare
-
-Accessible navigation inside hospitals and clinics.
-
-Public Spaces
-
-Transportation hubs, government offices, and urban environments.
-
-Independent Living
-
-Daily navigation and environmental awareness.
-
----
-
-🏆 Recognition
-
-Project developed by:
-
-Rudra Sarker
-
-Industrial & Production Engineering
-
-Shahjalal University of Science and Technology (SUST)
-
-Bangladesh
-
-Achievements associated with the project ecosystem include participation and recognition in innovation and accessibility-focused programs.
-
----
-
-🗺️ Roadmap
-
-Phase 1
-
-- AI Scene Analysis
-- OCR Support
-- Conversational Guidance
-
-Phase 2
-
-- Advanced Navigation
-- Accessibility Scoring
-- Risk Assessment
-
-Phase 3
-
-- Smart Glasses Integration
-- Edge AI Processing
-- Expanded Language Support
-
-Phase 4
-
-- Community Contributions
-- Global Accessibility Partnerships
-- Production Deployment
 
 ---
 
@@ -321,13 +109,14 @@ Phase 4
 
 Contributions are welcome.
 
-You can help by:
+Areas of contribution include:
 
-- Reporting bugs
-- Improving documentation
-- Enhancing accessibility
-- Adding translations
-- Building new features
+- Accessibility improvements
+- AI model enhancements
+- Documentation
+- Localization
+- Bug fixes
+- UI/UX improvements
 
 ---
 
@@ -337,36 +126,21 @@ Released under the MIT License.
 
 ---
 
-📬 Contact
+👨‍💻 Maintainer
 
 Rudra Sarker
 
-Email: rudrasarker130@gmail.com
+Industrial & Production Engineering
+Shahjalal University of Science and Technology (SUST)
 
-GitHub: https://github.com/rudra496
+🌐 Portfolio: https://rudra496.github.io/site
 
-LinkedIn: https://www.linkedin.com/in/rudrasarker
+🐙 GitHub: https://github.com/rudra496
 
-Portfolio: https://rudra496.github.io/site
+💼 LinkedIn: https://www.linkedin.com/in/rudrasarker
 
-Project Website:
-https://rudra496.github.io/sightlineai
-
-Repository:
-https://github.com/rudra496/sightlineai
+📧 Email: rudrasarker130@gmail.com
 
 ---
 
-🙏 Acknowledgements
-
-- Google Gemini
-- Qwen
-- OpenStreetMap Contributors
-- SUST
-- Rice360
-- Bangladesh Innovation Ecosystem
-- Accessibility Community Worldwide
-
----
-
-Built for accessibility. Built for impact. Built for everyone.
+Built for accessibility. Built for independence. Built for impact.
