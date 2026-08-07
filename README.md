@@ -40,6 +40,9 @@ By combining computer vision, OCR, conversational AI, and navigation intelligenc
 
 🧠 AI Architecture
 
+## 🎯 Research Value (A-Star Alignment)
+SightlineAI proves the viability of "End-cloud Collaborative Multi-terminal Agentic Systems." It establishes a physical proof-of-concept for real-time interactive AI agent architecture by decoupling sensory ingestion at the edge from heavy cognitive processing in the cloud.
+
 SightlineAI follows a multi-model architecture that supports multiple AI providers.
 
 Supported Models
