@@ -4,10 +4,12 @@ title: "SightlineAI: AI-Powered Smart Glasses Framework and Edge Computer Vision
 authors:
   - family-names: "Sarker"
     given-names: "Rudra"
+    affiliation: "Shahjalal University of Science and Technology, Bangladesh"
     orcid: "https://orcid.org/0009-0001-4545-0932"
-abstract: "SightlineAI is an open-source assistive technology platform utilizing edge computer vision, real-time spatial object detection, scene narration, and low-latency audio feedback designed for smart glasses hardware to assist visually impaired and blind individuals in navigating dynamic physical environments."
-version: 1.1.0
-date-released: 2026-08-26
+doi: "10.5281/zenodo.22118700"
+abstract: "SightlineAI is an open-source assistive technology platform utilizing edge computer vision, real-time spatial object detection, scene narration, and low-latency audio feedback designed for smart glasses hardware to assist visually impaired individuals."
+version: "1.1.0"
+date-released: "2026-08-26"
 license: "MIT"
 repository-code: "https://github.com/rudra496/sightlineai"
 url: "https://rudra496.github.io/sightlineai"
@@ -17,5 +19,4 @@ keywords:
   - "smart-glasses"
   - "accessibility"
   - "edge-ai"
-  - "object-detection"
   - "open-source"
