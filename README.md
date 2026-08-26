@@ -1,5 +1,7 @@
 👁️ SightlineAI
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22118700.svg)](https://doi.org/10.5281/zenodo.22118700)
+
 <div align="center">AI-Powered Accessibility Guidance Platform for the Visually Impaired
 
 Empowering independent navigation through multimodal artificial intelligence.
